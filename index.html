@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dean's Tech Hub - บล็อกเทคโนโลยี</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <!-- Header Navigation -->
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <h1>Dean's Tech Hub</h1>
+                    <p class="tagline">บล็อกเทคโนโลยี: AI, VPN, VPS & Tutorials</p>
+                </div>
+                <nav class="nav">
+                    <a href="#home" class="nav-link active" data-section="home">หน้าแรก</a>
+                    <a href="#ai" class="nav-link" data-section="ai">AI</a>
+                    <a href="#vpn" class="nav-link" data-section="vpn">VPN</a>
+                    <a href="#vps" class="nav-link" data-section="vps">VPS</a>
+                    <a href="#tutorials" class="nav-link" data-section="tutorials">Tutorials</a>
+                </nav>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main">
+            <!-- Home Section -->
+            <section id="home" class="section section-active">
+                <div class="hero">
+                    <h2>ยินดีต้อนรับสู่ Dean's Tech Hub</h2>
+                    <p>แหล่งรวมความรู้เทคโนโลยีส่วนตัวของ Dean - ตั้งแต่ AI, VPN, VPS ไปจนถึง Tutorials การติดตั้งต่างๆ</p>
+                    <p class="hero-subtext">ทุกสิ่งที่คุณต้องรู้ในที่เดียว ไม่ต้องไปหาที่อื่น</p>
+                </div>
+
+                <div class="featured-grid">
+                    <div class="featured-card" onclick="navigateTo('ai')">
+                        <div class="card-icon">🤖</div>
+                        <h3>Artificial Intelligence</h3>
+                        <p>เรียนรู้เกี่ยวกับ AI ต่างๆ วิธีใช้งาน และการเปรียบเทียบ</p>
+                        <span class="card-arrow">→</span>
+                    </div>
+                    <div class="featured-card" onclick="navigateTo('vpn')">
+                        <div class="card-icon">🔒</div>
+                        <h3>Virtual Private Network</h3>
+                        <p>ความรู้เรื่อง VPN ทั่วไป วิธีเลือกใช้ และการตั้งค่า</p>
+                        <span class="card-arrow">→</span>
+                    </div>
+                    <div class="featured-card" onclick="navigateTo('vps')">
+                        <div class="card-icon">🖥️</div>
+                        <h3>Virtual Private Server</h3>
+                        <p>วิธีสมัคร VPS ฟรี ขั้นตอนการตั้งค่า และการใช้งาน</p>
+                        <span class="card-arrow">→</span>
+                    </div>
+                    <div class="featured-card" onclick="navigateTo('tutorials')">
+                        <div class="card-icon">📚</div>
+                        <h3>Installation Guides</h3>
+                        <p>ขั้นตอนการติดตั้ง Linux, Server, Software และอื่นๆ</p>
+                        <span class="card-arrow">→</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- AI Section -->
+            <section id="ai" class="section">
+                <h2>Artificial Intelligence (AI)</h2>
+                <div class="articles-grid">
+                    <article class="article-card">
+                        <div class="article-header">
+                            <h3>ChatGPT vs Claude vs Gemini</h3>
+                            <time class="timestamp">2026-02-21</time>
+                        </div>
+                        <p>เปรียบเทียบโมเดล AI ยอดนิยมในปัจจุบัน: ChatGPT, Claude, และ Gemini ในด้านความสามารถ ความเร็ว และราคา</p>
+                        <div class="article-tags">
+                            <span class="tag">AI</span>
+                            <span class="tag">Comparison</span>
+                        </div>
+                    </article>
+
+                    <article class="article-card">
+                        <div class="article-header">
+                            <h3>วิธีใช้ ChatGPT API</h3>
+                            <time class="timestamp">2026-02-20</time>
+                        </div>
+                        <p>คำแนะนำขั้นตอนการสมัครและใช้ ChatGPT API เพื่อสร้างแอปพลิเคชันที่ใช้ AI ในโครงการของคุณ</p>
+                        <div class="article-tags">
+                            <span class="tag">ChatGPT</span>
+                            <span class="tag">API</span>
+                            <span class="tag">Tutorial</span>
+                        </div>
+                    </article>
+
+                    <article class="article-card">
+                        <div class="article-header">
+                            <h3>Prompt Engineering 101</h3>
+                            <time class="timestamp">2026-02-19</time>
+                        </div>
+                        <p>เทคนิคการเขียน Prompt ที่มีประสิทธิภาพเพื่อให้ AI ตอบสนองตามที่คุณต้องการ</p>
+                        <div class="article-tags">
+                            <span class="tag">Prompt</span>
+                            <span class="tag">Tips</span>
+                        </div>
+                    </article>
+
+                    <article class="article-card">
+                        <div class="article-header">
+                            <h3>Local LLM: Ollama & Llama 2</h3>
+                            <time class="timestamp">2026-02-18</time>
+                        </div>
+                        <p>ติดตั้งและใช้งาน Ollama เพื่อรัน Large Language Model ขนาดใหญ่บนเครื่องของคุณเองโดยไม่ต้องเชื่อมต่ออินเทอร์เน็ต</p>
+                        <div class="article-tags">
+                            <span class="tag">Ollama</span>
+                            <span class="tag">Local</span>
+                            <span class="tag">LLM</span>
+                        </div>
+                    </article>
+                </div>
+            </section>
+
+            <!-- VPN Section -->
+            <section id="vpn" class="section">
+                <h2>Virtual Private Network (VPN)</h2>
+                <div class="articles-grid">
+                    <article class="article-card">
+                        <div class="article-header">
+                            <h3>VPN คืออะไร? ทำไมต้องใช้?</h3>
+                            <time class="timestamp">2026-02-21</time>
+                        </div>
+                        <p>ความรู้พื้นฐานเกี่ยวกับ VPN วิธีการทำงาน ข้อดี และข้อเสีย รวมถึงเมื่อไหร่ที่ควรใช้ VPN</p>
+                        <div class="article-tags">
+                            <span class="tag">VPN</span>
+                            <span class="tag">Basics</span>
+                        </div>
+                    </article>
+
+                    <article class="article-card">
+                        <div class="article-header">
+                            <h3>วิธีเลือก VPN ที่ดี</h3>
+                            <time class="timestamp">2026-02-20</time>
+                        </div>
+                        <p>เกณฑ์การเลือก VPN ที่ดี: ความเร็ว ความปลอดภัย ราคา และการรักษาความเป็นส่วนตัว</p>
+                        <div class="article-tags">
+                            <span class="tag">VPN</span>
+                            <span class="tag">Guide</span>
+                        </div>
+                    </article>
+
+                    <article class="article-card">
+                        <div class="article-header">
+                            <h3>VPN ฟรี vs VPN เสียเงิน</h3>
+                            <time class="timestamp">2026-02-19</time>
+                        </div>
+                        <p>เปรียบเทียบความแตกต่างระหว่าง VPN ฟรีกับ VPN เสียเงิน ข้อดีข้อเสีย และข้อเสี่ยง</p>
+                        <div class="article-tags">
+                            <span class="tag">VPN</span>
+                            <span class="tag">Comparison</span>
+                        </div>
+                    </article>
+
+                    <article class="article-card">
+                        <div class="article-header">
+                            <h3>ติดตั้ง WireGuard VPN</h3>
+                            <time class="timestamp">2026-02-18</time>
+                        </div>
+                        <p>ขั้นตอนการติดตั้งและตั้งค่า WireGuard - โปรโตคอล VPN ที่เร็วและปลอดภัย</p>
+                        <div class="article-tags">
+                            <span class="tag">WireGuard</span>
+                            <span class="tag">Tutorial</span>
+                        </div>
+                    </article>
+                </div>
+            </section>
+
+            <!-- VPS Section -->
+            <section id="vps" class="section">
+                <h2>Virtual Private Server (VPS)</h2>
+                <div class="articles-grid">
+                    <article class="article-card">
+                        <div class="article-header">
+                            <h3>VPS คืออะไร? ทำไมต้องใช้?</h3>
+                            <time class="timestamp">2026-02-21</time>
+                        </div>
+                        <p>ความรู้พื้นฐานเกี่ยวกับ VPS ความแตกต่างจาก Shared Hosting และ Dedicated Server</p>
+                        <div class="article-tags">
+                            <span class="tag">VPS</span>
+                            <span class="tag">Basics</span>
+                        </div>
+                    </article>
+
+                    <article class="article-card">
+                        <div class="article-header">
+                            <h3>สมัคร AWS EC2 ฟรี (Free Tier)</h3>
+                            <time class="timestamp">2026-02-20</time>
+                        </div>
+                        <p>ขั้นตอนการสมัครและตั้งค่า AWS EC2 ฟรีเป็นเวลา 12 เดือน รวมถึงการสร้าง Instance แรก</p>
+                        <div class="article-tags">
+                            <span class="tag">AWS</span>
+                            <span class="tag">Free Tier</span>
+                            <span class="tag">Tutorial</span>
+                        </div>
+                    </article>
+
+                    <article class="article-card">
+                        <div class="article-header">
+                            <h3>Oracle Cloud Free Tier - ได้ VPS ฟรีตลอด</h3>
+                            <time class="timestamp">2026-02-19</time>
+                        </div>
+                        <p>วิธีสมัครและใช้ Oracle Cloud ฟรีตลอดไป รวมถึง Compute Instance ที่ได้ฟรีตลอด</p>
+                        <div class="article-tags">
+                            <span class="tag">Oracle Cloud</span>
+                            <span class="tag">Free</span>
+                            <span class="tag">VPS</span>
+                        </div>
+                    </article>
+
+                    <article class="article-card">
+                        <div class="article-header">
+                            <h3>ตั้งค่า VPS หลังจากสมัคร</h3>
+                            <time class="timestamp">2026-02-18</time>
+                        </div>
+                        <p>ขั้นตอนการตั้งค่า VPS หลังจากสมัครเสร็จ: SSH, Firewall, User Management และความปลอดภัย</p>
+                        <div class="article-tags">
+                            <span class="tag">VPS</span>
+                            <span class="tag">Setup</span>
+                            <span class="tag">Security</span>
+                        </div>
+                    </article>
+
+                    <article class="article-card">
+                        <div class="article-header">
+                            <h3>เปรียบเทียบ VPS Providers</h3>
+                            <time class="timestamp">2026-02-17</time>
+                        </div>
+                        <p>เปรียบเทียบ VPS Providers ต่างๆ: AWS, Oracle Cloud, DigitalOcean, Linode และอื่นๆ</p>
+                        <div class="article-tags">
+                            <span class="tag">VPS</span>
+                            <span class="tag">Comparison</span>
+                        </div>
+                    </article>
+                </div>
+            </section>
+
+            <!-- Tutorials Section -->
+            <section id="tutorials" class="section">
+                <h2>Installation Guides & Tutorials</h2>
+                <div class="articles-grid">
+                    <article class="article-card">
+                        <div class="article-header">
+                            <h3>ติดตั้ง Linux บน VPS (Ubuntu 22.04)</h3>
+                            <time class="timestamp">2026-02-21</time>
+                        </div>
+                        <p>ขั้นตอนการติดตั้งและตั้งค่า Ubuntu 22.04 บน VPS พร้อม Update และ Security Hardening</p>
+                        <div class="article-tags">
+                            <span class="tag">Linux</span>
+                            <span class="tag">Ubuntu</span>
+                            <span class="tag">VPS</span>
+                        </div>
+                    </article>
+
+                    <article class="article-card">
+                        <div class="article-header">
+                            <h3>ติดตั้ง Node.js และ npm</h3>
+                            <time class="timestamp">2026-02-20</time>
+                        </div>
+                        <p>วิธีติดตั้ง Node.js และ npm บน Linux พร้อมการตั้งค่า npm Global Packages</p>
+                        <div class="article-tags">
+                            <span class="tag">Node.js</span>
+                            <span class="tag">npm</span>
+                            <span class="tag">Tutorial</span>
+                        </div>
+                    </article>
+
+                    <article class="article-card">
+                        <div class="article-header">
+                            <h3>ติดตั้ง Docker</h3>
+                            <time class="timestamp">2026-02-19</time>
+                        </div>
+                        <p>ขั้นตอนการติดตั้ง Docker บน Linux และการใช้งาน Docker Container ขั้นพื้นฐาน</p>
+                        <div class="article-tags">
+                            <span class="tag">Docker</span>
+                            <span class="tag">Container</span>
+                            <span class="tag">Tutorial</span>
+                        </div>
+                    </article>
+
+                    <article class="article-card">
+                        <div class="article-header">
+                            <h3>ตั้งค่า Nginx Web Server</h3>
+                            <time class="timestamp">2026-02-18</time>
+                        </div>
+                        <p>วิธีติดตั้งและตั้งค่า Nginx เป็น Web Server และ Reverse Proxy บน Linux</p>
+                        <div class="article-tags">
+                            <span class="tag">Nginx</span>
+                            <span class="tag">Web Server</span>
+                            <span class="tag">Tutorial</span>
+                        </div>
+                    </article>
+
+                    <article class="article-card">
+                        <div class="article-header">
+                            <h3>ติดตั้ง SSL Certificate (Let's Encrypt)</h3>
+                            <time class="timestamp">2026-02-17</time>
+                        </div>
+                        <p>วิธีติดตั้ง SSL Certificate ฟรีจาก Let's Encrypt โดยใช้ Certbot</p>
+                        <div class="article-tags">
+                            <span class="tag">SSL</span>
+                            <span class="tag">HTTPS</span>
+                            <span class="tag">Security</span>
+                        </div>
+                    </article>
+
+                    <article class="article-card">
+                        <div class="article-header">
+                            <h3>ติดตั้ง PostgreSQL Database</h3>
+                            <time class="timestamp">2026-02-16</time>
+                        </div>
+                        <p>ขั้นตอนการติดตั้งและตั้งค่า PostgreSQL Database บน Linux พร้อมการสร้าง User และ Database</p>
+                        <div class="article-tags">
+                            <span class="tag">PostgreSQL</span>
+                            <span class="tag">Database</span>
+                            <span class="tag">Tutorial</span>
+                        </div>
+                    </article>
+
+                    <article class="article-card">
+                        <div class="article-header">
+                            <h3>ติดตั้ง Git และ GitHub SSH</h3>
+                            <time class="timestamp">2026-02-15</time>
+                        </div>
+                        <p>วิธีติดตั้ง Git บน Linux และการตั้งค่า SSH Key เพื่อเชื่อมต่อกับ GitHub</p>
+                        <div class="article-tags">
+                            <span class="tag">Git</span>
+                            <span class="tag">GitHub</span>
+                            <span class="tag">SSH</span>
+                        </div>
+                    </article>
+
+                    <article class="article-card">
+                        <div class="article-header">
+                            <h3>ติดตั้ง Python 3 และ pip</h3>
+                            <time class="timestamp">2026-02-14</time>
+                        </div>
+                        <p>ขั้นตอนการติดตั้ง Python 3 และ pip บน Linux พร้อมการสร้าง Virtual Environment</p>
+                        <div class="article-tags">
+                            <span class="tag">Python</span>
+                            <span class="tag">pip</span>
+                            <span class="tag">Tutorial</span>
+                        </div>
+                    </article>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-content">
+                <p>&copy; 2026 Dean's Tech Hub. All rights reserved.</p>
+                <p class="footer-note">Made with ❤️ by Dean | Last updated: Feb 2026</p>
+            </div>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
