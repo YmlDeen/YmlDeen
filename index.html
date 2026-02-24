@@ -1,370 +1,350 @@
 <!DOCTYPE html>
-<html lang="th">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dean's Tech Hub - บล็อกเทคโนโลยี</title>
-    <link rel="stylesheet" href="styles.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <title>YmlDeen // SYSTEM</title>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=VT323&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --green: #00ff41;
+            --dark-green: #008f11;
+            --dim-green: #003b00;
+            --black: #0d0d0d;
+            --bg: #050505;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: var(--bg);
+            color: var(--green);
+            font-family: 'Share Tech Mono', monospace;
+            min-height: 100vh;
+            overflow-x: hidden;
+            cursor: none;
+        }
+
+        /* Custom cursor */
+        .cursor {
+            position: fixed;
+            width: 20px; height: 20px;
+            border: 2px solid var(--green);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+            transition: transform 0.1s, border-color 0.2s;
+            box-shadow: 0 0 10px var(--green);
+        }
+
+        /* Matrix rain canvas */
+        #matrix-canvas {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            opacity: 0.07;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* Scanlines */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(0, 255, 65, 0.015) 2px,
+                rgba(0, 255, 65, 0.015) 4px
+            );
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* Vignette */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.8) 100%);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .container {
+            position: relative;
+            z-index: 2;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+
+        /* Top bar */
+        .topbar {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            padding: 12px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--dim-green);
+            background: rgba(5,5,5,0.9);
+            z-index: 10;
+            font-size: 0.75rem;
+            color: var(--dark-green);
+        }
+
+        .topbar .blink {
+            animation: blink 1s step-end infinite;
+            color: var(--green);
+        }
+
+        @keyframes blink {
+            50% { opacity: 0; }
+        }
+
+        /* Main terminal window */
+        .terminal {
+            width: 100%;
+            max-width: 700px;
+            border: 1px solid var(--dark-green);
+            box-shadow: 0 0 30px rgba(0,255,65,0.1), 0 0 60px rgba(0,255,65,0.05);
+            background: rgba(0,10,0,0.85);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .terminal-header {
+            background: var(--dim-green);
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.75rem;
+            color: var(--dark-green);
+        }
+
+        .terminal-dot {
+            width: 10px; height: 10px;
+            border-radius: 50%;
+            background: var(--dark-green);
+        }
+
+        .terminal-title { margin-left: 8px; color: var(--green); }
+
+        .terminal-body {
+            padding: 30px;
+            font-size: 0.9rem;
+            line-height: 1.8;
+        }
+
+        .line {
+            opacity: 0;
+            transform: translateY(4px);
+            animation: fadein 0.3s forwards;
+        }
+
+        @keyframes fadein {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .line:nth-child(1) { animation-delay: 0.3s; }
+        .line:nth-child(2) { animation-delay: 0.7s; }
+        .line:nth-child(3) { animation-delay: 1.1s; }
+        .line:nth-child(4) { animation-delay: 1.5s; }
+        .line:nth-child(5) { animation-delay: 1.9s; }
+        .line:nth-child(6) { animation-delay: 2.3s; }
+        .line:nth-child(7) { animation-delay: 2.7s; }
+        .line:nth-child(8) { animation-delay: 3.1s; }
+        .line:nth-child(9) { animation-delay: 3.5s; }
+
+        .prompt { color: var(--dark-green); }
+        .cmd { color: var(--green); }
+        .output { color: #00cc33; padding-left: 0; }
+        .dim { color: #005500; }
+        .accent { color: #39ff14; font-weight: bold; }
+
+        /* Big ASCII name */
+        .ascii-name {
+            font-family: 'VT323', monospace;
+            font-size: clamp(2.5rem, 8vw, 5rem);
+            color: var(--green);
+            text-shadow: 0 0 20px rgba(0,255,65,0.5), 0 0 40px rgba(0,255,65,0.2);
+            letter-spacing: 0.1em;
+            line-height: 1;
+            display: block;
+            margin: 8px 0;
+        }
+
+        .status-bar {
+            margin-top: 30px;
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.75rem;
+            color: var(--dark-green);
+            border: 1px solid var(--dim-green);
+            padding: 6px 14px;
+            border-radius: 2px;
+            opacity: 0;
+            animation: fadein 0.3s 3.8s forwards;
+        }
+
+        .status-dot {
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: var(--green);
+            box-shadow: 0 0 6px var(--green);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .glitch {
+            position: relative;
+            display: inline-block;
+        }
+        .glitch:hover {
+            animation: glitch 0.3s infinite;
+            text-shadow: 2px 0 #ff0000, -2px 0 #0000ff, 0 0 20px var(--green);
+        }
+        @keyframes glitch {
+            0% { transform: translate(0); }
+            20% { transform: translate(-2px, 1px); }
+            40% { transform: translate(2px, -1px); }
+            60% { transform: translate(-1px, 2px); }
+            80% { transform: translate(1px, -2px); }
+            100% { transform: translate(0); }
+        }
+
+        .input-line {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 4px;
+            opacity: 0;
+            animation: fadein 0.3s 4.2s forwards;
+        }
+
+        .input-cursor {
+            display: inline-block;
+            width: 8px; height: 16px;
+            background: var(--green);
+            animation: blink 0.8s step-end infinite;
+            vertical-align: middle;
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <!-- Header Navigation -->
-        <header class="header">
-            <div class="header-content">
-                <div class="logo">
-                    <h1>Dean's Tech Hub</h1>
-                    <p class="tagline">บล็อกเทคโนโลยี: AI, VPN, VPS & Tutorials</p>
-                </div>
-                <nav class="nav">
-                    <a href="#home" class="nav-link active" data-section="home">หน้าแรก</a>
-                    <a href="#ai" class="nav-link" data-section="ai">AI</a>
-                    <a href="#vpn" class="nav-link" data-section="vpn">VPN</a>
-                    <a href="#vps" class="nav-link" data-section="vps">VPS</a>
-                    <a href="#tutorials" class="nav-link" data-section="tutorials">Tutorials</a>
-                </nav>
-            </div>
-        </header>
+    <div class="cursor" id="cursor"></div>
+    <canvas id="matrix-canvas"></canvas>
 
-        <!-- Main Content -->
-        <main class="main">
-            <!-- Home Section -->
-            <section id="home" class="section section-active">
-                <div class="hero">
-                    <h2>ยินดีต้อนรับสู่ Dean's Tech Hub</h2>
-                    <p>แหล่งรวมความรู้เทคโนโลยีส่วนตัวของ Dean - ตั้งแต่ AI, VPN, VPS ไปจนถึง Tutorials การติดตั้งต่างๆ</p>
-                    <p class="hero-subtext">ทุกสิ่งที่คุณต้องรู้ในที่เดียว ไม่ต้องไปหาที่อื่น</p>
-                </div>
-
-                <div class="featured-grid">
-                    <div class="featured-card" onclick="navigateTo('ai')">
-                        <div class="card-icon">🤖</div>
-                        <h3>Artificial Intelligence</h3>
-                        <p>เรียนรู้เกี่ยวกับ AI ต่างๆ วิธีใช้งาน และการเปรียบเทียบ</p>
-                        <span class="card-arrow">→</span>
-                    </div>
-                    <div class="featured-card" onclick="navigateTo('vpn')">
-                        <div class="card-icon">🔒</div>
-                        <h3>Virtual Private Network</h3>
-                        <p>ความรู้เรื่อง VPN ทั่วไป วิธีเลือกใช้ และการตั้งค่า</p>
-                        <span class="card-arrow">→</span>
-                    </div>
-                    <div class="featured-card" onclick="navigateTo('vps')">
-                        <div class="card-icon">🖥️</div>
-                        <h3>Virtual Private Server</h3>
-                        <p>วิธีสมัคร VPS ฟรี ขั้นตอนการตั้งค่า และการใช้งาน</p>
-                        <span class="card-arrow">→</span>
-                    </div>
-                    <div class="featured-card" onclick="navigateTo('tutorials')">
-                        <div class="card-icon">📚</div>
-                        <h3>Installation Guides</h3>
-                        <p>ขั้นตอนการติดตั้ง Linux, Server, Software และอื่นๆ</p>
-                        <span class="card-arrow">→</span>
-                    </div>
-                </div>
-            </section>
-
-            <!-- AI Section -->
-            <section id="ai" class="section">
-                <h2>Artificial Intelligence (AI)</h2>
-                <div class="articles-grid">
-                    <article class="article-card">
-                        <div class="article-header">
-                            <h3>ChatGPT vs Claude vs Gemini</h3>
-                            <time class="timestamp">2026-02-21</time>
-                        </div>
-                        <p>เปรียบเทียบโมเดล AI ยอดนิยมในปัจจุบัน: ChatGPT, Claude, และ Gemini ในด้านความสามารถ ความเร็ว และราคา</p>
-                        <div class="article-tags">
-                            <span class="tag">AI</span>
-                            <span class="tag">Comparison</span>
-                        </div>
-                    </article>
-
-                    <article class="article-card">
-                        <div class="article-header">
-                            <h3>วิธีใช้ ChatGPT API</h3>
-                            <time class="timestamp">2026-02-20</time>
-                        </div>
-                        <p>คำแนะนำขั้นตอนการสมัครและใช้ ChatGPT API เพื่อสร้างแอปพลิเคชันที่ใช้ AI ในโครงการของคุณ</p>
-                        <div class="article-tags">
-                            <span class="tag">ChatGPT</span>
-                            <span class="tag">API</span>
-                            <span class="tag">Tutorial</span>
-                        </div>
-                    </article>
-
-                    <article class="article-card">
-                        <div class="article-header">
-                            <h3>Prompt Engineering 101</h3>
-                            <time class="timestamp">2026-02-19</time>
-                        </div>
-                        <p>เทคนิคการเขียน Prompt ที่มีประสิทธิภาพเพื่อให้ AI ตอบสนองตามที่คุณต้องการ</p>
-                        <div class="article-tags">
-                            <span class="tag">Prompt</span>
-                            <span class="tag">Tips</span>
-                        </div>
-                    </article>
-
-                    <article class="article-card">
-                        <div class="article-header">
-                            <h3>Local LLM: Ollama & Llama 2</h3>
-                            <time class="timestamp">2026-02-18</time>
-                        </div>
-                        <p>ติดตั้งและใช้งาน Ollama เพื่อรัน Large Language Model ขนาดใหญ่บนเครื่องของคุณเองโดยไม่ต้องเชื่อมต่ออินเทอร์เน็ต</p>
-                        <div class="article-tags">
-                            <span class="tag">Ollama</span>
-                            <span class="tag">Local</span>
-                            <span class="tag">LLM</span>
-                        </div>
-                    </article>
-                </div>
-            </section>
-
-            <!-- VPN Section -->
-            <section id="vpn" class="section">
-                <h2>Virtual Private Network (VPN)</h2>
-                <div class="articles-grid">
-                    <article class="article-card">
-                        <div class="article-header">
-                            <h3>VPN คืออะไร? ทำไมต้องใช้?</h3>
-                            <time class="timestamp">2026-02-21</time>
-                        </div>
-                        <p>ความรู้พื้นฐานเกี่ยวกับ VPN วิธีการทำงาน ข้อดี และข้อเสีย รวมถึงเมื่อไหร่ที่ควรใช้ VPN</p>
-                        <div class="article-tags">
-                            <span class="tag">VPN</span>
-                            <span class="tag">Basics</span>
-                        </div>
-                    </article>
-
-                    <article class="article-card">
-                        <div class="article-header">
-                            <h3>วิธีเลือก VPN ที่ดี</h3>
-                            <time class="timestamp">2026-02-20</time>
-                        </div>
-                        <p>เกณฑ์การเลือก VPN ที่ดี: ความเร็ว ความปลอดภัย ราคา และการรักษาความเป็นส่วนตัว</p>
-                        <div class="article-tags">
-                            <span class="tag">VPN</span>
-                            <span class="tag">Guide</span>
-                        </div>
-                    </article>
-
-                    <article class="article-card">
-                        <div class="article-header">
-                            <h3>VPN ฟรี vs VPN เสียเงิน</h3>
-                            <time class="timestamp">2026-02-19</time>
-                        </div>
-                        <p>เปรียบเทียบความแตกต่างระหว่าง VPN ฟรีกับ VPN เสียเงิน ข้อดีข้อเสีย และข้อเสี่ยง</p>
-                        <div class="article-tags">
-                            <span class="tag">VPN</span>
-                            <span class="tag">Comparison</span>
-                        </div>
-                    </article>
-
-                    <article class="article-card">
-                        <div class="article-header">
-                            <h3>ติดตั้ง WireGuard VPN</h3>
-                            <time class="timestamp">2026-02-18</time>
-                        </div>
-                        <p>ขั้นตอนการติดตั้งและตั้งค่า WireGuard - โปรโตคอล VPN ที่เร็วและปลอดภัย</p>
-                        <div class="article-tags">
-                            <span class="tag">WireGuard</span>
-                            <span class="tag">Tutorial</span>
-                        </div>
-                    </article>
-                </div>
-            </section>
-
-            <!-- VPS Section -->
-            <section id="vps" class="section">
-                <h2>Virtual Private Server (VPS)</h2>
-                <div class="articles-grid">
-                    <article class="article-card">
-                        <div class="article-header">
-                            <h3>VPS คืออะไร? ทำไมต้องใช้?</h3>
-                            <time class="timestamp">2026-02-21</time>
-                        </div>
-                        <p>ความรู้พื้นฐานเกี่ยวกับ VPS ความแตกต่างจาก Shared Hosting และ Dedicated Server</p>
-                        <div class="article-tags">
-                            <span class="tag">VPS</span>
-                            <span class="tag">Basics</span>
-                        </div>
-                    </article>
-
-                    <article class="article-card">
-                        <div class="article-header">
-                            <h3>สมัคร AWS EC2 ฟรี (Free Tier)</h3>
-                            <time class="timestamp">2026-02-20</time>
-                        </div>
-                        <p>ขั้นตอนการสมัครและตั้งค่า AWS EC2 ฟรีเป็นเวลา 12 เดือน รวมถึงการสร้าง Instance แรก</p>
-                        <div class="article-tags">
-                            <span class="tag">AWS</span>
-                            <span class="tag">Free Tier</span>
-                            <span class="tag">Tutorial</span>
-                        </div>
-                    </article>
-
-                    <article class="article-card">
-                        <div class="article-header">
-                            <h3>Oracle Cloud Free Tier - ได้ VPS ฟรีตลอด</h3>
-                            <time class="timestamp">2026-02-19</time>
-                        </div>
-                        <p>วิธีสมัครและใช้ Oracle Cloud ฟรีตลอดไป รวมถึง Compute Instance ที่ได้ฟรีตลอด</p>
-                        <div class="article-tags">
-                            <span class="tag">Oracle Cloud</span>
-                            <span class="tag">Free</span>
-                            <span class="tag">VPS</span>
-                        </div>
-                    </article>
-
-                    <article class="article-card">
-                        <div class="article-header">
-                            <h3>ตั้งค่า VPS หลังจากสมัคร</h3>
-                            <time class="timestamp">2026-02-18</time>
-                        </div>
-                        <p>ขั้นตอนการตั้งค่า VPS หลังจากสมัครเสร็จ: SSH, Firewall, User Management และความปลอดภัย</p>
-                        <div class="article-tags">
-                            <span class="tag">VPS</span>
-                            <span class="tag">Setup</span>
-                            <span class="tag">Security</span>
-                        </div>
-                    </article>
-
-                    <article class="article-card">
-                        <div class="article-header">
-                            <h3>เปรียบเทียบ VPS Providers</h3>
-                            <time class="timestamp">2026-02-17</time>
-                        </div>
-                        <p>เปรียบเทียบ VPS Providers ต่างๆ: AWS, Oracle Cloud, DigitalOcean, Linode และอื่นๆ</p>
-                        <div class="article-tags">
-                            <span class="tag">VPS</span>
-                            <span class="tag">Comparison</span>
-                        </div>
-                    </article>
-                </div>
-            </section>
-
-            <!-- Tutorials Section -->
-            <section id="tutorials" class="section">
-                <h2>Installation Guides & Tutorials</h2>
-                <div class="articles-grid">
-                    <article class="article-card">
-                        <div class="article-header">
-                            <h3>ติดตั้ง Linux บน VPS (Ubuntu 22.04)</h3>
-                            <time class="timestamp">2026-02-21</time>
-                        </div>
-                        <p>ขั้นตอนการติดตั้งและตั้งค่า Ubuntu 22.04 บน VPS พร้อม Update และ Security Hardening</p>
-                        <div class="article-tags">
-                            <span class="tag">Linux</span>
-                            <span class="tag">Ubuntu</span>
-                            <span class="tag">VPS</span>
-                        </div>
-                    </article>
-
-                    <article class="article-card">
-                        <div class="article-header">
-                            <h3>ติดตั้ง Node.js และ npm</h3>
-                            <time class="timestamp">2026-02-20</time>
-                        </div>
-                        <p>วิธีติดตั้ง Node.js และ npm บน Linux พร้อมการตั้งค่า npm Global Packages</p>
-                        <div class="article-tags">
-                            <span class="tag">Node.js</span>
-                            <span class="tag">npm</span>
-                            <span class="tag">Tutorial</span>
-                        </div>
-                    </article>
-
-                    <article class="article-card">
-                        <div class="article-header">
-                            <h3>ติดตั้ง Docker</h3>
-                            <time class="timestamp">2026-02-19</time>
-                        </div>
-                        <p>ขั้นตอนการติดตั้ง Docker บน Linux และการใช้งาน Docker Container ขั้นพื้นฐาน</p>
-                        <div class="article-tags">
-                            <span class="tag">Docker</span>
-                            <span class="tag">Container</span>
-                            <span class="tag">Tutorial</span>
-                        </div>
-                    </article>
-
-                    <article class="article-card">
-                        <div class="article-header">
-                            <h3>ตั้งค่า Nginx Web Server</h3>
-                            <time class="timestamp">2026-02-18</time>
-                        </div>
-                        <p>วิธีติดตั้งและตั้งค่า Nginx เป็น Web Server และ Reverse Proxy บน Linux</p>
-                        <div class="article-tags">
-                            <span class="tag">Nginx</span>
-                            <span class="tag">Web Server</span>
-                            <span class="tag">Tutorial</span>
-                        </div>
-                    </article>
-
-                    <article class="article-card">
-                        <div class="article-header">
-                            <h3>ติดตั้ง SSL Certificate (Let's Encrypt)</h3>
-                            <time class="timestamp">2026-02-17</time>
-                        </div>
-                        <p>วิธีติดตั้ง SSL Certificate ฟรีจาก Let's Encrypt โดยใช้ Certbot</p>
-                        <div class="article-tags">
-                            <span class="tag">SSL</span>
-                            <span class="tag">HTTPS</span>
-                            <span class="tag">Security</span>
-                        </div>
-                    </article>
-
-                    <article class="article-card">
-                        <div class="article-header">
-                            <h3>ติดตั้ง PostgreSQL Database</h3>
-                            <time class="timestamp">2026-02-16</time>
-                        </div>
-                        <p>ขั้นตอนการติดตั้งและตั้งค่า PostgreSQL Database บน Linux พร้อมการสร้าง User และ Database</p>
-                        <div class="article-tags">
-                            <span class="tag">PostgreSQL</span>
-                            <span class="tag">Database</span>
-                            <span class="tag">Tutorial</span>
-                        </div>
-                    </article>
-
-                    <article class="article-card">
-                        <div class="article-header">
-                            <h3>ติดตั้ง Git และ GitHub SSH</h3>
-                            <time class="timestamp">2026-02-15</time>
-                        </div>
-                        <p>วิธีติดตั้ง Git บน Linux และการตั้งค่า SSH Key เพื่อเชื่อมต่อกับ GitHub</p>
-                        <div class="article-tags">
-                            <span class="tag">Git</span>
-                            <span class="tag">GitHub</span>
-                            <span class="tag">SSH</span>
-                        </div>
-                    </article>
-
-                    <article class="article-card">
-                        <div class="article-header">
-                            <h3>ติดตั้ง Python 3 และ pip</h3>
-                            <time class="timestamp">2026-02-14</time>
-                        </div>
-                        <p>ขั้นตอนการติดตั้ง Python 3 และ pip บน Linux พร้อมการสร้าง Virtual Environment</p>
-                        <div class="article-tags">
-                            <span class="tag">Python</span>
-                            <span class="tag">pip</span>
-                            <span class="tag">Tutorial</span>
-                        </div>
-                    </article>
-                </div>
-            </section>
-        </main>
-
-        <!-- Footer -->
-        <footer class="footer">
-            <div class="footer-content">
-                <p>&copy; 2026 Dean's Tech Hub. All rights reserved.</p>
-                <p class="footer-note">Made with ❤️ by Dean | Last updated: Feb 2026</p>
-            </div>
-        </footer>
+    <div class="topbar">
+        <span>SYS://YMLDEEN.ONRENDER.COM</span>
+        <span><span class="blink">●</span> ONLINE — SECURE CONNECTION ESTABLISHED</span>
+        <span id="clock"></span>
     </div>
 
-    <script src="script.js"></script>
+    <div class="container">
+        <div class="terminal">
+            <div class="terminal-header">
+                <div class="terminal-dot"></div>
+                <div class="terminal-dot"></div>
+                <div class="terminal-dot"></div>
+                <span class="terminal-title">bash — ymldeen@server:~</span>
+            </div>
+            <div class="terminal-body">
+                <div class="line"><span class="prompt">root@server:~$ </span><span class="cmd">whoami</span></div>
+                <div class="line"><span class="output ascii-name glitch">YmlDeen</span></div>
+                <div class="line"><span class="dim">───────────────────────────────────────</span></div>
+                <div class="line"><span class="prompt">root@server:~$ </span><span class="cmd">cat profile.txt</span></div>
+                <div class="line"><span class="output">▸ Developer & Builder</span></div>
+                <div class="line"><span class="output">▸ Running on <span class="accent">Python / Flask</span></span></div>
+                <div class="line"><span class="output">▸ Deployed via <span class="accent">Render</span></span></div>
+                <div class="line"><span class="dim">───────────────────────────────────────</span></div>
+                <div class="line"><span class="prompt">root@server:~$ </span><span class="cmd">ping ymldeen.onrender.com</span></div>
+
+                <div class="status-bar">
+                    <div class="status-item"><div class="status-dot"></div>SERVER ONLINE</div>
+                    <div class="status-item"><div class="status-dot"></div>FLASK RUNNING</div>
+                    <div class="status-item"><div class="status-dot"></div>ALL SYSTEMS GO</div>
+                </div>
+
+                <div class="input-line">
+                    <span class="prompt">root@server:~$ </span>
+                    <span class="input-cursor"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Custom cursor
+        const cursor = document.getElementById('cursor');
+        document.addEventListener('mousemove', e => {
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top = e.clientY + 'px';
+        });
+
+        // Clock
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('clock').textContent =
+                now.toLocaleTimeString('en-GB') + ' UTC+7';
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // Matrix rain
+        const canvas = document.getElementById('matrix-canvas');
+        const ctx = canvas.getContext('2d');
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const chars = 'アイウエオカキクケコサシスセソタチツテトナニヌネノ0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ<>{}[]|/\\';
+        const fontSize = 14;
+        const cols = Math.floor(canvas.width / fontSize);
+        const drops = Array(cols).fill(1);
+
+        function drawMatrix() {
+            ctx.fillStyle = 'rgba(5,5,5,0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#00ff41';
+            ctx.font = fontSize + 'px Share Tech Mono';
+
+            drops.forEach((y, i) => {
+                const char = chars[Math.floor(Math.random() * chars.length)];
+                ctx.fillStyle = Math.random() > 0.95 ? '#ffffff' : '#00ff41';
+                ctx.fillText(char, i * fontSize, y * fontSize);
+                if (y * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
+                drops[i]++;
+            });
+        }
+
+        setInterval(drawMatrix, 50);
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+    </script>
 </body>
 </html>
