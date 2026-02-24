@@ -1,254 +1,350 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>XAUUSD · Gold Terminal</title>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
-<style>
-*{margin:0;padding:0;box-sizing:border-box;-webkit-font-smoothing:antialiased}
-:root{--bg:#0C0D0F;--bg2:#131417;--bg3:#1a1b1e;--g:#B89B4C;--gl:#D4B96A;--gf:rgba(184,155,76,.1);--w:#F0EDE4;--w2:rgba(240,237,228,.45);--w3:rgba(240,237,228,.08);--st:#6E7480;--b:rgba(240,237,228,.07);--bg2:rgba(184,155,76,.18);--gr:#3A9B6A;--rd:#B46050}
-body{background:var(--bg);color:var(--w);font-family:'DM Mono',monospace;font-weight:300;min-height:100vh}
-.wrap{max-width:420px;margin:0 auto;padding:0 12px 50px}
-@keyframes fi{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
-.s{opacity:0;animation:fi .8s cubic-bezier(.16,1,.3,1) both}
-.s:nth-child(1){animation-delay:.05s}.s:nth-child(2){animation-delay:.15s}.s:nth-child(3){animation-delay:.26s}.s:nth-child(4){animation-delay:.37s}.s:nth-child(5){animation-delay:.48s}.s:nth-child(6){animation-delay:.59s}.s:nth-child(7){animation-delay:.70s}.s:nth-child(8){animation-delay:.81s}
-.card{background:var(--bg2);border:1px solid var(--b);border-radius:12px;padding:16px;margin-bottom:9px;position:relative;overflow:hidden}
-.card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(184,155,76,.2),transparent)}
-.lbl{font-size:.48rem;color:var(--g);letter-spacing:.28em;text-transform:uppercase;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
-.badge{font-size:.44rem;padding:2px 7px;border:1px solid rgba(184,155,76,.2);border-radius:20px;color:var(--g)}
-/* topbar */
-.top{display:flex;justify-content:space-between;align-items:center;padding:14px 4px 10px;font-size:.52rem;color:var(--st);letter-spacing:.15em}
-.dot{width:5px;height:5px;border-radius:50%;background:var(--gr);display:inline-block;margin-right:4px;opacity:.8}
-/* clock */
-.ck-date{font-family:'Cormorant Garamond',serif;font-size:.9rem;color:var(--w2);margin-bottom:5px}
-.ck-row{display:flex;align-items:baseline;gap:5px}
-.ck-t{font-family:'Cormorant Garamond',serif;font-size:2.6rem;font-weight:300;color:var(--w);line-height:1}
-.ck-ms{font-size:.6rem;color:var(--st)}
-.ck-tz{font-size:.46rem;color:var(--g);letter-spacing:.14em;margin-top:4px}
-/* price */
-.px-sym{font-size:.5rem;color:var(--st);letter-spacing:.1em;margin-bottom:2px}
-.px-big{font-family:'Cormorant Garamond',serif;font-size:3.4rem;font-weight:300;color:var(--w);line-height:1;transition:color .6s}
-.px-big.up{color:var(--gl)}.px-big.dn{color:var(--w2)}
-.px-chg{font-size:.58rem;margin:3px 0 12px;transition:color .6s}
-.px-chg.up{color:var(--g)}.px-chg.dn{color:var(--rd)}
-.thb-row{display:flex;justify-content:space-between;align-items:flex-end;padding:9px 0;border-top:1px solid var(--b);border-bottom:1px solid var(--b);margin-bottom:12px}
-.thb-v{font-family:'Cormorant Garamond',serif;font-size:1.5rem;color:var(--w)}
-.thb-u{font-size:.44rem;color:var(--g);letter-spacing:.1em;text-align:right}
-.sub3{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--b);border-radius:7px;overflow:hidden}
-.si{background:var(--bg3);padding:9px 6px;text-align:center}
-.si-l{font-size:.44rem;color:var(--st);letter-spacing:.1em;margin-bottom:3px}
-.si-v{font-family:'Cormorant Garamond',serif;font-size:1rem;color:var(--w);line-height:1}
-.si-c{font-size:.42rem;margin-top:2px}.si-c.up{color:var(--gr)}.si-c.dn{color:var(--rd)}
-/* chart */
-.tf-row{display:flex;gap:3px;margin-bottom:9px}
-.tf{flex:1;padding:4px;text-align:center;font-size:.48rem;letter-spacing:.06em;color:var(--st);border:1px solid transparent;border-radius:5px;cursor:pointer;transition:all .4s;background:transparent}
-.tf.on{color:var(--g);border-color:rgba(184,155,76,.2);background:var(--gf)}
-.chart-c{height:150px;position:relative;margin-bottom:7px}
-canvas#gc{display:block;width:100%;height:100%}
-.vol-c{height:22px;display:flex;align-items:flex-end;gap:1px;margin-bottom:5px}
-.vb{flex:1;border-radius:1px;background:var(--w3);transition:height .5s}
-.mstruct{font-size:.44rem;color:var(--st);letter-spacing:.06em;line-height:1.6}
-/* grid panels */
-.g2{display:grid;grid-template-columns:1fr 1fr;gap:7px}
-.g4{display:grid;grid-template-columns:1fr 1fr;gap:7px}
-.pi{padding:10px;background:var(--bg3);border-radius:8px;border:1px solid var(--b)}
-.pi-l{font-size:.44rem;color:var(--st);letter-spacing:.13em;margin-bottom:3px}
-.pi-v{font-family:'Cormorant Garamond',serif;font-size:1.15rem;color:var(--w);line-height:1}
-.pi-v.pos{color:var(--gr)}.pi-v.neg{color:var(--rd)}.pi-v.g{color:var(--gl)}
-/* trend rows */
-.tr{display:flex;align-items:center;gap:8px;padding:7px 9px;background:var(--bg3);border-radius:7px;border:1px solid var(--b);margin-bottom:5px}
-.tr:last-child{margin-bottom:0}
-.tr-tf{font-size:.5rem;color:var(--st);width:24px}
-.tr-bar{flex:1;height:2px;background:var(--w3);border-radius:1px;overflow:hidden}
-.tr-fill{height:100%;border-radius:1px;transition:width 1.1s cubic-bezier(.16,1,.3,1)}
-.bull{background:linear-gradient(90deg,rgba(184,155,76,.3),var(--gl))}.bear{background:linear-gradient(90deg,rgba(110,116,128,.3),var(--rd))}.neut{background:linear-gradient(90deg,rgba(110,116,128,.3),var(--st))}
-.tr-lbl{font-size:.48rem;width:44px;text-align:right}.tr-lbl.bull{color:var(--gr)}.tr-lbl.bear{color:var(--rd)}.tr-lbl.neut{color:var(--st)}
-/* sessions */
-.se{display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--bg3);border-radius:7px;border:1px solid var(--b);margin-bottom:5px;transition:border-color .8s}
-.se:last-child{margin-bottom:0}.se.on{border-color:rgba(184,155,76,.25)}
-.se-r{width:26px;height:26px;border-radius:50%;border:1px solid var(--b);display:flex;align-items:center;justify-content:center;font-size:.52rem;color:var(--st);flex-shrink:0;transition:border-color .8s}
-.se.on .se-r{border-color:var(--g);animation:spin 10s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-.se-city{font-family:'Cormorant Garamond',serif;font-size:.85rem;color:var(--w)}.se-t{font-size:.44rem;color:var(--st);margin-top:1px}
-.se-st{font-size:.44rem;color:var(--st)}.se.on .se-st{color:var(--gr)}
-/* ai */
-.ai-t{font-family:'Cormorant Garamond',serif;font-size:1rem;color:var(--w);line-height:1.6;min-height:46px}
-.ai-cur{display:inline-block;width:1.5px;height:.8em;background:var(--g);vertical-align:text-bottom;animation:bl .9s step-end infinite}
-@keyframes bl{50%{opacity:0}}
-.ai-foot{display:flex;justify-content:space-between;margin-top:8px;padding-top:8px;border-top:1px solid var(--b);font-size:.46rem;color:var(--st)}
-.ai-cv{font-family:'Cormorant Garamond',serif;font-size:1rem;color:var(--gl)}
-/* alert */
-.alert{position:fixed;top:-70px;left:50%;transform:translateX(-50%);width:calc(100% - 24px);max-width:400px;z-index:999;background:rgba(19,20,23,.96);border:1px solid rgba(184,155,76,.2);border-radius:9px;padding:9px 13px;display:flex;align-items:center;gap:8px;backdrop-filter:blur(12px);transition:top .9s cubic-bezier(.16,1,.3,1),opacity .7s;opacity:0}
-.alert.show{top:10px;opacity:1}
-.a-dot{width:5px;height:5px;border-radius:50%;background:var(--g);flex-shrink:0}
-.a-t{font-size:.5rem;color:var(--g);letter-spacing:.05em;flex:1}
-.a-x{font-size:.65rem;color:var(--st);cursor:pointer;padding:2px 5px}
-/* prob bar */
-.pb{display:flex;height:5px;border-radius:3px;overflow:hidden;margin-bottom:7px}
-.pbb{background:linear-gradient(90deg,rgba(184,155,76,.3),rgba(212,185,106,.6));transition:flex .8s cubic-bezier(.16,1,.3,1)}
-.pbr{background:rgba(180,96,80,.2);transition:flex .8s cubic-bezier(.16,1,.3,1)}
-.pl{display:flex;justify-content:space-between;font-size:.48rem}
-.pl .bu{color:var(--g)}.pl .be{color:var(--rd)}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YmlDeen // SYSTEM</title>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=VT323&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --green: #00ff41;
+            --dark-green: #008f11;
+            --dim-green: #003b00;
+            --black: #0d0d0d;
+            --bg: #050505;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: var(--bg);
+            color: var(--green);
+            font-family: 'Share Tech Mono', monospace;
+            min-height: 100vh;
+            overflow-x: hidden;
+            cursor: none;
+        }
+
+        /* Custom cursor */
+        .cursor {
+            position: fixed;
+            width: 20px; height: 20px;
+            border: 2px solid var(--green);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+            transition: transform 0.1s, border-color 0.2s;
+            box-shadow: 0 0 10px var(--green);
+        }
+
+        /* Matrix rain canvas */
+        #matrix-canvas {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            opacity: 0.07;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* Scanlines */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(0, 255, 65, 0.015) 2px,
+                rgba(0, 255, 65, 0.015) 4px
+            );
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* Vignette */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.8) 100%);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .container {
+            position: relative;
+            z-index: 2;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+
+        /* Top bar */
+        .topbar {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            padding: 12px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--dim-green);
+            background: rgba(5,5,5,0.9);
+            z-index: 10;
+            font-size: 0.75rem;
+            color: var(--dark-green);
+        }
+
+        .topbar .blink {
+            animation: blink 1s step-end infinite;
+            color: var(--green);
+        }
+
+        @keyframes blink {
+            50% { opacity: 0; }
+        }
+
+        /* Main terminal window */
+        .terminal {
+            width: 100%;
+            max-width: 700px;
+            border: 1px solid var(--dark-green);
+            box-shadow: 0 0 30px rgba(0,255,65,0.1), 0 0 60px rgba(0,255,65,0.05);
+            background: rgba(0,10,0,0.85);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .terminal-header {
+            background: var(--dim-green);
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.75rem;
+            color: var(--dark-green);
+        }
+
+        .terminal-dot {
+            width: 10px; height: 10px;
+            border-radius: 50%;
+            background: var(--dark-green);
+        }
+
+        .terminal-title { margin-left: 8px; color: var(--green); }
+
+        .terminal-body {
+            padding: 30px;
+            font-size: 0.9rem;
+            line-height: 1.8;
+        }
+
+        .line {
+            opacity: 0;
+            transform: translateY(4px);
+            animation: fadein 0.3s forwards;
+        }
+
+        @keyframes fadein {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .line:nth-child(1) { animation-delay: 0.3s; }
+        .line:nth-child(2) { animation-delay: 0.7s; }
+        .line:nth-child(3) { animation-delay: 1.1s; }
+        .line:nth-child(4) { animation-delay: 1.5s; }
+        .line:nth-child(5) { animation-delay: 1.9s; }
+        .line:nth-child(6) { animation-delay: 2.3s; }
+        .line:nth-child(7) { animation-delay: 2.7s; }
+        .line:nth-child(8) { animation-delay: 3.1s; }
+        .line:nth-child(9) { animation-delay: 3.5s; }
+
+        .prompt { color: var(--dark-green); }
+        .cmd { color: var(--green); }
+        .output { color: #00cc33; padding-left: 0; }
+        .dim { color: #005500; }
+        .accent { color: #39ff14; font-weight: bold; }
+
+        /* Big ASCII name */
+        .ascii-name {
+            font-family: 'VT323', monospace;
+            font-size: clamp(2.5rem, 8vw, 5rem);
+            color: var(--green);
+            text-shadow: 0 0 20px rgba(0,255,65,0.5), 0 0 40px rgba(0,255,65,0.2);
+            letter-spacing: 0.1em;
+            line-height: 1;
+            display: block;
+            margin: 8px 0;
+        }
+
+        .status-bar {
+            margin-top: 30px;
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.75rem;
+            color: var(--dark-green);
+            border: 1px solid var(--dim-green);
+            padding: 6px 14px;
+            border-radius: 2px;
+            opacity: 0;
+            animation: fadein 0.3s 3.8s forwards;
+        }
+
+        .status-dot {
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: var(--green);
+            box-shadow: 0 0 6px var(--green);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .glitch {
+            position: relative;
+            display: inline-block;
+        }
+        .glitch:hover {
+            animation: glitch 0.3s infinite;
+            text-shadow: 2px 0 #ff0000, -2px 0 #0000ff, 0 0 20px var(--green);
+        }
+        @keyframes glitch {
+            0% { transform: translate(0); }
+            20% { transform: translate(-2px, 1px); }
+            40% { transform: translate(2px, -1px); }
+            60% { transform: translate(-1px, 2px); }
+            80% { transform: translate(1px, -2px); }
+            100% { transform: translate(0); }
+        }
+
+        .input-line {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 4px;
+            opacity: 0;
+            animation: fadein 0.3s 4.2s forwards;
+        }
+
+        .input-cursor {
+            display: inline-block;
+            width: 8px; height: 16px;
+            background: var(--green);
+            animation: blink 0.8s step-end infinite;
+            vertical-align: middle;
+        }
+    </style>
 </head>
 <body>
-<div class="alert" id="al"><div class="a-dot"></div><div class="a-t" id="at">Golden Cross — EMA50 crossing above EMA100</div><div class="a-x" onclick="this.parentElement.classList.remove('show')">✕</div></div>
-<div class="wrap">
-<div class="top s"><span><span class="dot"></span>LIVE</span><span>XAUUSD TERMINAL</span><span id="sbT">--:--</span></div>
+    <div class="cursor" id="cursor"></div>
+    <canvas id="matrix-canvas"></canvas>
 
-<div class="card s">
-  <div class="lbl">Bangkok Clock<span class="badge">GMT+7</span></div>
-  <div class="ck-date" id="ckD">—</div>
-  <div class="ck-row"><div class="ck-t" id="ckT">--:--:--</div><div class="ck-ms" id="ckM">.000</div></div>
-  <div class="ck-tz">INDOCHINA TIME · GMT +7:00</div>
-</div>
+    <div class="topbar">
+        <span>SYS://YMLDEEN.ONRENDER.COM</span>
+        <span><span class="blink">●</span> ONLINE — SECURE CONNECTION ESTABLISHED</span>
+        <span id="clock"></span>
+    </div>
 
-<div class="card s">
-  <div class="lbl">Live Gold<span class="badge" id="mkB">MARKET OPEN</span></div>
-  <div class="px-sym">XAUUSD · USD / TROY OZ</div>
-  <div class="px-big up" id="pM">2,341.80</div>
-  <div class="px-chg up" id="pC">+12.40 · +0.53%</div>
-  <div class="thb-row"><div><div style="font-size:.44rem;color:var(--st);letter-spacing:.12em;margin-bottom:3px">GOLD IN THB</div><div class="thb-v" id="thbV">81,568</div></div><div class="thb-u"><div>THB / OZ</div><div id="thbG" style="margin-top:3px">2,624 THB/g</div></div></div>
-  <div class="sub3">
-    <div class="si"><div class="si-l">XAUUSD</div><div class="si-v" id="v1">2,341.8</div><div class="si-c up" id="c1">+0.53%</div></div>
-    <div class="si"><div class="si-l">USDTHB</div><div class="si-v" id="v2">34.82</div><div class="si-c up" id="c2">+0.08%</div></div>
-    <div class="si"><div class="si-l">DXY</div><div class="si-v" id="v3">104.21</div><div class="si-c dn" id="c3">−0.14%</div></div>
-  </div>
-</div>
+    <div class="container">
+        <div class="terminal">
+            <div class="terminal-header">
+                <div class="terminal-dot"></div>
+                <div class="terminal-dot"></div>
+                <div class="terminal-dot"></div>
+                <span class="terminal-title">bash — ymldeen@server:~</span>
+            </div>
+            <div class="terminal-body">
+                <div class="line"><span class="prompt">root@server:~$ </span><span class="cmd">whoami</span></div>
+                <div class="line"><span class="output ascii-name glitch">YmlDeen</span></div>
+                <div class="line"><span class="dim">───────────────────────────────────────</span></div>
+                <div class="line"><span class="prompt">root@server:~$ </span><span class="cmd">cat profile.txt</span></div>
+                <div class="line"><span class="output">▸ Developer & Builder</span></div>
+                <div class="line"><span class="output">▸ Running on <span class="accent">Python / Flask</span></span></div>
+                <div class="line"><span class="output">▸ Deployed via <span class="accent">Render</span></span></div>
+                <div class="line"><span class="dim">───────────────────────────────────────</span></div>
+                <div class="line"><span class="prompt">root@server:~$ </span><span class="cmd">ping ymldeen.onrender.com</span></div>
 
-<div class="card s">
-  <div class="lbl">Chart</div>
-  <div class="tf-row">
-    <button class="tf" onclick="setTF(this)">1m</button><button class="tf on" onclick="setTF(this)">5m</button><button class="tf" onclick="setTF(this)">1H</button><button class="tf" onclick="setTF(this)">4H</button><button class="tf" onclick="setTF(this)">1D</button>
-  </div>
-  <div class="chart-c"><canvas id="gc"></canvas></div>
-  <div class="vol-c" id="volC"></div>
-  <div class="mstruct" id="ms">Structure: Higher High · Higher Low · Bullish</div>
-</div>
+                <div class="status-bar">
+                    <div class="status-item"><div class="status-dot"></div>SERVER ONLINE</div>
+                    <div class="status-item"><div class="status-dot"></div>FLASK RUNNING</div>
+                    <div class="status-item"><div class="status-dot"></div>ALL SYSTEMS GO</div>
+                </div>
 
-<div class="card s">
-  <div class="lbl">Trend Matrix</div>
-  <div class="tr"><div class="tr-tf">1H</div><div class="tr-bar"><div class="tr-fill bull" data-w="75" style="width:0"></div></div><div class="tr-lbl bull">Bullish</div></div>
-  <div class="tr"><div class="tr-tf">4H</div><div class="tr-bar"><div class="tr-fill bull" data-w="68" style="width:0"></div></div><div class="tr-lbl bull">Bullish</div></div>
-  <div class="tr"><div class="tr-tf">1D</div><div class="tr-bar"><div class="tr-fill neut" data-w="50" style="width:0"></div></div><div class="tr-lbl neut">Neutral</div></div>
-  <div class="tr"><div class="tr-tf">1W</div><div class="tr-bar"><div class="tr-fill bull" data-w="80" style="width:0"></div></div><div class="tr-lbl bull">Bullish</div></div>
-</div>
+                <div class="input-line">
+                    <span class="prompt">root@server:~$ </span>
+                    <span class="input-cursor"></span>
+                </div>
+            </div>
+        </div>
+    </div>
 
-<div class="card s">
-  <div class="lbl">Probability</div>
-  <div class="pb"><div class="pbb" id="pbb" style="flex:68"></div><div class="pbr" id="pbr" style="flex:32"></div></div>
-  <div class="pl"><span class="bu">Bullish · <span id="bpct">68%</span></span><span class="be">Bearish · <span id="rpct">32%</span></span></div>
-</div>
+    <script>
+        // Custom cursor
+        const cursor = document.getElementById('cursor');
+        document.addEventListener('mousemove', e => {
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top = e.clientY + 'px';
+        });
 
-<div class="card s">
-  <div class="lbl">Risk · Portfolio</div>
-  <div class="g4" style="margin-bottom:7px">
-    <div class="pi"><div class="pi-l">RSI (14)</div><div class="pi-v" id="rsi">56.4</div></div>
-    <div class="pi"><div class="pi-l">ATR</div><div class="pi-v" id="atr">14.8</div></div>
-    <div class="pi"><div class="pi-l">P / L</div><div class="pi-v pos" id="ppl">+$1,590</div></div>
-    <div class="pi"><div class="pi-l">RR Ratio</div><div class="pi-v g">1 : 3.2</div></div>
-  </div>
-</div>
+        // Clock
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('clock').textContent =
+                now.toLocaleTimeString('en-GB') + ' UTC+7';
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
 
-<div class="card s">
-  <div class="lbl">Sessions</div>
-  <div class="se" id="sL"><div class="se-r">◇</div><div style="flex:1"><div class="se-city">London</div><div class="se-t" id="tL">-- GMT</div></div><div class="se-st" id="stL">CLOSED</div></div>
-  <div class="se" id="sN"><div class="se-r">◇</div><div style="flex:1"><div class="se-city">New York</div><div class="se-t" id="tN">-- EST</div></div><div class="se-st" id="stN">CLOSED</div></div>
-  <div class="se" id="sB"><div class="se-r">◇</div><div style="flex:1"><div class="se-city">Bangkok</div><div class="se-t" id="tB">-- ICT</div></div><div class="se-st" id="stB">ACTIVE</div></div>
-</div>
+        // Matrix rain
+        const canvas = document.getElementById('matrix-canvas');
+        const ctx = canvas.getContext('2d');
 
-<div class="card s">
-  <div class="lbl">AI Insight<span class="badge">60s · <span id="aiCD">60s</span></span></div>
-  <div class="ai-t"><span id="aiT"></span><span class="ai-cur"></span></div>
-  <div class="ai-foot"><span>CONFIDENCE</span><span class="ai-cv" id="aiC">68%</span></div>
-</div>
-</div>
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
 
-<script>
-const pad=n=>String(n).padStart(2,'0');
-const DAYS=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-const MON=['January','February','March','April','May','June','July','August','September','October','November','December'];
-function updateClock(){
-  const now=new Date(),ms=now.getMilliseconds();
-  const bkk=new Date(now.getTime()+(7*60+now.getTimezoneOffset())*60000);
-  document.getElementById('ckD').textContent=DAYS[bkk.getDay()]+', '+bkk.getDate()+' '+MON[bkk.getMonth()]+' '+bkk.getFullYear();
-  document.getElementById('ckT').textContent=pad(bkk.getHours())+':'+pad(bkk.getMinutes())+':'+pad(bkk.getSeconds());
-  document.getElementById('ckM').textContent='.'+String(ms).padStart(3,'0');
-  document.getElementById('sbT').textContent=pad(bkk.getHours())+':'+pad(bkk.getMinutes());
-  const u=now.getUTCHours(),um=pad(now.getUTCMinutes());
-  const sess=[{i:'sL',ti:'tL',si:'stL',on:u>=8&&u<17,t:pad(u)+':'+um+' GMT'},{i:'sN',ti:'tN',si:'stN',on:u>=13&&u<21,t:pad(((u-4)+24)%24)+':'+um+' EST'},{i:'sB',ti:'tB',si:'stB',on:u>=1&&u<10,t:pad(bkk.getHours())+':'+pad(bkk.getMinutes())+' ICT'}];
-  sess.forEach(s=>{document.getElementById(s.i).className='se'+(s.on?' on':'');document.getElementById(s.ti).textContent=s.t;document.getElementById(s.si).textContent=s.on?'ACTIVE':'CLOSED';});
-}
-setInterval(updateClock,100);updateClock();
+        const chars = 'アイウエオカキクケコサシスセソタチツテトナニヌネノ0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ<>{}[]|/\\';
+        const fontSize = 14;
+        const cols = Math.floor(canvas.width / fontSize);
+        const drops = Array(cols).fill(1);
 
-let gold=2341.80,thb=34.82,dxy=104.21;
-function tick(){
-  gold+=(Math.random()-.49)*.5;thb+=(Math.random()-.5)*.006;dxy+=(Math.random()-.5)*.018;
-  const chg=gold-2329.40,cp=(chg/2329.40)*100,up=chg>=0;
-  document.getElementById('pM').textContent=gold.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
-  document.getElementById('pM').className='px-big '+(up?'up':'dn');
-  document.getElementById('pC').textContent=(up?'+':'')+chg.toFixed(2)+' · '+(up?'+':'')+cp.toFixed(2)+'%';
-  document.getElementById('pC').className='px-chg '+(up?'up':'dn');
-  const xt=gold*thb;
-  document.getElementById('thbV').textContent=Math.round(xt).toLocaleString('en-US');
-  document.getElementById('thbG').textContent=Math.round(xt/31.1035).toLocaleString('en-US')+' THB/g';
-  document.getElementById('v1').textContent=gold.toFixed(1);
-  document.getElementById('v2').textContent=thb.toFixed(2);
-  document.getElementById('v3').textContent=dxy.toFixed(2);
-  const tc=(thb-34.80)/34.80*100,dc=(dxy-104.35)/104.35*100;
-  document.getElementById('c1').textContent=(up?'+':'')+cp.toFixed(2)+'%';document.getElementById('c1').className='si-c '+(up?'up':'dn');
-  document.getElementById('c2').textContent=(tc>=0?'+':'')+tc.toFixed(2)+'%';document.getElementById('c2').className='si-c '+(tc>=0?'up':'dn');
-  document.getElementById('c3').textContent=(dc>=0?'+':'−')+Math.abs(dc).toFixed(2)+'%';document.getElementById('c3').className='si-c '+(dc>=0?'up':'dn');
-  const pl=(gold-2310)*50;
-  document.getElementById('ppl').textContent=(pl>=0?'+':'-')+'$'+Math.abs(pl).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g,',');
-  document.getElementById('ppl').className='pi-v '+(pl>=0?'pos':'neg');
-  const bull=Math.max(40,Math.min(80,55+cp*4));
-  document.getElementById('pbb').style.flex=bull;document.getElementById('pbr').style.flex=100-bull;
-  document.getElementById('bpct').textContent=bull.toFixed(0)+'%';document.getElementById('rpct').textContent=(100-bull).toFixed(0)+'%';
-  document.getElementById('rsi').textContent=Math.max(30,Math.min(72,50+(gold-2329)*.35+(Math.random()-.5)*2)).toFixed(1);
-  document.getElementById('atr').textContent=(12+Math.abs(chg)*.25+Math.random()*1.5).toFixed(1);
-  drawChart();
-}
-setInterval(tick,1800);
+        function drawMatrix() {
+            ctx.fillStyle = 'rgba(5,5,5,0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#00ff41';
+            ctx.font = fontSize + 'px Share Tech Mono';
 
-const cv=document.getElementById('gc'),cx=cv.getContext('2d');
-let cd=[];
-function bd(){cd=[];for(let i=0;i<60;i++){const b=2305+i*.6+Math.sin(i*.22)*13+Math.sin(i*.07)*7,o=b+(Math.random()-.5)*3,c=b+(Math.random()-.5)*3;cd.push({o,h:Math.max(o,c)+Math.random()*2.5,l:Math.min(o,c)-Math.random()*2.5,c});}}
-bd();
-function rs(){cv.width=cv.offsetWidth*(window.devicePixelRatio||1);cv.height=cv.offsetHeight*(window.devicePixelRatio||1);cx.scale(window.devicePixelRatio||1,window.devicePixelRatio||1);}rs();
-function ma(d,p){return d.map((_,i)=>i<p-1?null:d.slice(i-p+1,i+1).reduce((s,x)=>s+x.c,0)/p);}
-function ema(d,p){const k=2/(p+1);let pv=null;return d.map((x,i)=>{if(i<p-1)return null;if(pv===null)pv=d.slice(0,p).reduce((s,v)=>s+v.c,0)/p;pv=x.c*k+pv*(1-k);return pv;});}
-function drawChart(){
-  const W=cv.offsetWidth,H=cv.offsetHeight;cx.clearRect(0,0,W,H);
-  const mn=Math.min(...cd.map(d=>d.l))-1,mx=Math.max(...cd.map(d=>d.h))+1,rng=mx-mn;
-  const py=v=>H-((v-mn)/rng)*H,px=i=>(i/(cd.length-1))*W,cw=Math.max(1.5,(W/cd.length)*.45);
-  const hh=Math.max(...cd.map(d=>d.h)),ll=Math.min(...cd.map(d=>d.l)),mid=(hh+ll)/2;
-  [{v:hh-1,l:'R2',c:'rgba(180,96,80,.22)'},{v:mid+(hh-mid)*.5,l:'R1',c:'rgba(180,96,80,.15)'},{v:mid-(mid-ll)*.5,l:'S1',c:'rgba(58,155,106,.15)'},{v:ll+1,l:'S2',c:'rgba(58,155,106,.22)'}].forEach(sr=>{
-    const y=py(sr.v);cx.beginPath();cx.moveTo(0,y);cx.lineTo(W-24,y);cx.strokeStyle=sr.c;cx.lineWidth=.5;cx.setLineDash([3,4]);cx.stroke();cx.setLineDash([]);
-    cx.font='7px "DM Mono"';cx.fillStyle=sr.c.replace('.22','.8').replace('.15','.7');cx.textAlign='right';cx.fillText(sr.l,W-2,y-2);
-  });
-  cd.forEach((d,i)=>{const x=px(i),bull=d.c>=d.o;cx.strokeStyle=bull?'rgba(240,237,228,.5)':'rgba(110,116,128,.4)';cx.fillStyle=bull?'rgba(240,237,228,.15)':'rgba(110,116,128,.1)';cx.lineWidth=.4;cx.beginPath();cx.moveTo(x,py(d.h));cx.lineTo(x,py(d.l));cx.stroke();const bh=Math.max(1,Math.abs(py(d.o)-py(d.c)));cx.fillRect(x-cw/2,Math.min(py(d.o),py(d.c)),cw,bh);cx.strokeRect(x-cw/2,Math.min(py(d.o),py(d.c)),cw,bh);});
-  const dl=(arr,col)=>{cx.beginPath();let f=true;arr.forEach((v,i)=>{if(v===null)return;f?cx.moveTo(px(i),py(v)):cx.lineTo(px(i),py(v));f=false;});cx.strokeStyle=col;cx.lineWidth=.7;cx.stroke();};
-  dl(ma(cd,50),'rgba(110,116,128,.5)');dl(ma(cd,100),'rgba(110,116,128,.28)');dl(ema(cd,50),'rgba(184,155,76,.65)');dl(ema(cd,100),'rgba(184,155,76,.35)');
-  const lx=px(cd.length-1),ly=py(cd[cd.length-1].c);cx.beginPath();cx.arc(lx,ly,2.5,0,Math.PI*2);cx.fillStyle='rgba(212,185,106,.9)';cx.fill();
-  const nv=cd[cd.length-1].c+(Math.random()-.49)*.4;cd.push({o:cd[cd.length-1].c,h:Math.max(cd[cd.length-1].c,nv)+Math.random()*1.2,l:Math.min(cd[cd.length-1].c,nv)-Math.random()*1.2,c:nv});if(cd.length>80)cd.shift();
-  const l5h=cd.slice(-5).map(d=>d.h),l5l=cd.slice(-5).map(d=>d.l);
-  document.getElementById('ms').textContent=l5h[4]>l5h[3]&&l5l[4]>l5l[3]?'Structure: Higher High · Higher Low · Bullish':!( l5h[4]>l5h[3])?'Structure: Potential BOS — monitor':'Structure: Consolidation — watching breakout';
-}
-function setTF(btn){document.querySelectorAll('.tf').forEach(b=>b.classList.remove('on'));btn.classList.add('on');bd();drawChart();}
-const vc=document.getElementById('volC');
-for(let i=0;i<48;i++){const b=document.createElement('div');b.className='vb';b.style.height=(8+Math.random()*15)+'px';vc.appendChild(b);}
-setInterval(()=>{const bs=vc.querySelectorAll('.vb');bs[Math.floor(Math.random()*bs.length)].style.height=(8+Math.random()*17)+'px';},650);
-setTimeout(()=>document.querySelectorAll('.tr-fill').forEach(f=>f.style.width=f.dataset.w+'%'),400);
-const ins=[{t:"Wave 3 extension above MA50.\nDXY weakening — bullish continuation.",c:"68%"},{t:"EMA50 above EMA100 — Golden Cross.\nMomentum toward 2,360.",c:"72%"},{t:"Dollar Index below 104.00 increases\nupside probability for gold.",c:"74%"},{t:"MA100 as dynamic support.\nBullish structure intact above 2,310.",c:"65%"}];
-let ai=0,cd2=60;
-function typeAI(ins){const el=document.getElementById('aiT');document.getElementById('aiC').textContent=ins.c;el.textContent='';let i=0;function t(){if(i<ins.t.length){el.textContent+=ins.t[i];i++;setTimeout(t,20+Math.random()*15);}}t();}
-setTimeout(()=>typeAI(ins[0]),700);
-setInterval(()=>{cd2--;document.getElementById('aiCD').textContent=cd2+'s';if(cd2<=0){cd2=60;ai=(ai+1)%ins.length;typeAI(ins[ai]);}},1000);
-setTimeout(()=>{document.getElementById('al').classList.add('show');setTimeout(()=>document.getElementById('al').classList.remove('show'),5000);},3000);
-window.addEventListener('resize',()=>{rs();drawChart();});
-drawChart();
-</script>
+            drops.forEach((y, i) => {
+                const char = chars[Math.floor(Math.random() * chars.length)];
+                ctx.fillStyle = Math.random() > 0.95 ? '#ffffff' : '#00ff41';
+                ctx.fillText(char, i * fontSize, y * fontSize);
+                if (y * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
+                drops[i]++;
+            });
+        }
+
+        setInterval(drawMatrix, 50);
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+    </script>
 </body>
 </html>
