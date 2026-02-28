@@ -3,119 +3,160 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Gold · YmlDeen</title>
+<title>Bangkok Gold Terminal · YmlDeen</title>
+
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;600&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-font-smoothing:antialiased}
-:root{--bg:#0C0D0F;--c:#131417;--c2:#1a1b1e;--g:#B89B4C;--gl:#D4B96A;--w:#F0EDE4;--w2:rgba(240,237,228,.45);--st:#6E7480;--b:rgba(240,237,228,.07);--gr:#3A9B6A;--rd:#B46050}
-body{background:var(--bg);color:var(--w);font-family:'DM Mono',monospace;font-weight:300;min-height:100vh;display:flex;justify-content:center}
-.page{width:100%;max-width:400px;padding:0 12px 50px}
-@keyframes fi{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
-.s{opacity:0;animation:fi .9s cubic-bezier(.16,1,.3,1) both}
-.s1{animation-delay:.05s}.s2{animation-delay:.2s}.s3{animation-delay:.35s}.s4{animation-delay:.5s}.s5{animation-delay:.65s}
-.card{background:var(--c);border:1px solid var(--b);border-radius:14px;padding:16px;margin-bottom:10px;position:relative;overflow:hidden}
-.card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(184,155,76,.2),transparent)}
-.lbl{font-size:.48rem;color:var(--g);letter-spacing:.28em;text-transform:uppercase;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
-.badge{font-size:.44rem;padding:2px 8px;border:1px solid rgba(184,155,76,.22);border-radius:20px;color:var(--g)}
-.top{display:flex;justify-content:space-between;padding:13px 2px 10px;font-size:.52rem;color:var(--st);letter-spacing:.14em;align-items:center}
-.dot{width:5px;height:5px;border-radius:50%;background:var(--gr);display:inline-block;margin-right:4px;opacity:.8}
-.ck-city{font-size:.5rem;color:var(--st);letter-spacing:.2em;margin-bottom:4px}
-.ck-date{font-family:'Cormorant Garamond',serif;font-size:.92rem;color:var(--w2);margin-bottom:6px}
-.ck-big{display:flex;align-items:baseline;gap:5px}
-.ck-t{font-family:'Cormorant Garamond',serif;font-size:3rem;font-weight:300;color:var(--w);line-height:1}
-.ck-ms{font-size:.62rem;color:var(--st)}
-.ck-tz{font-size:.46rem;color:var(--g);letter-spacing:.14em;margin-top:5px}
-.hijri-row{display:flex;justify-content:space-between;align-items:center;margin-top:10px;padding-top:10px;border-top:1px solid var(--b)}
-.hijri-v{font-family:'Cormorant Garamond',serif;font-size:1rem;color:var(--w)}
-.hijri-l{font-size:.43rem;color:var(--st);letter-spacing:.1em;margin-bottom:2px}
-.ramadan{font-size:.43rem;padding:3px 9px;background:rgba(184,155,76,.1);border:1px solid rgba(184,155,76,.28);border-radius:20px;color:var(--gl)}
-.tg-big{font-family:'Cormorant Garamond',serif;font-size:4.2rem;font-weight:600;color:var(--gl);line-height:1;letter-spacing:-.02em}
-.tg-unit{font-size:.48rem;color:var(--st);letter-spacing:.1em;margin:4px 0 10px}
-.tg-row{display:flex;justify-content:space-between;padding-top:9px;border-top:1px solid var(--b);font-size:.47rem;color:var(--w2)}
-.spot-big{font-family:'Cormorant Garamond',serif;font-size:3rem;font-weight:300;line-height:1;transition:color .6s}
-.spot-big.up{color:var(--gl)}.spot-big.dn{color:var(--w2)}
-.spot-chg{font-size:.57rem;margin:4px 0 0;transition:color .6s}
-.spot-chg.up{color:var(--g)}.spot-chg.dn{color:var(--rd)}
-.tv{border-radius:10px;overflow:hidden;height:260px;margin-top:2px}
+:root{
+--bg:#0C0D0F;--card:#131417;--gold:#D4B96A;
+--text:#F0EDE4;--muted:#6E7480;
+--green:#3A9B6A;--red:#B46050;
+--border:rgba(240,237,228,.07)
+}
+body{
+background:var(--bg);
+color:var(--text);
+font-family:'DM Mono',monospace;
+display:flex;
+justify-content:center;
+min-height:100vh
+}
+.page{width:100%;max-width:420px;padding:20px 14px 60px}
+
+.card{
+background:var(--card);
+border:1px solid var(--border);
+border-radius:16px;
+padding:18px;
+margin-bottom:12px
+}
+
+.lbl{
+font-size:.6rem;
+letter-spacing:.25em;
+color:var(--gold);
+margin-bottom:12px
+}
+
+.big{
+font-family:'Cormorant Garamond',serif;
+font-size:3rem;
+font-weight:300
+}
+
+.gold-big{
+font-family:'Cormorant Garamond',serif;
+font-size:4rem;
+font-weight:600;
+color:var(--gold)
+}
+
+.row{
+display:flex;
+justify-content:space-between;
+margin-top:10px;
+font-size:.8rem;
+color:var(--muted)
+}
+
+.up{color:var(--green)}
+.dn{color:var(--red)}
+
+iframe{border-radius:12px;width:100%;height:300px}
 </style>
 </head>
 <body>
+
 <div class="page">
-<div class="top s s1"><span><span class="dot"></span>LIVE</span><span>GOLD TERMINAL</span><span id="sbT">--:--</span></div>
-<div class="card s s2">
-  <div class="lbl">Bangkok Clock <span class="badge">GMT+7</span></div>
-  <div class="ck-city">BANGKOK · THAILAND</div>
-  <div class="ck-date" id="ckD">—</div>
-  <div class="ck-big"><div class="ck-t" id="ckT">--:--:--</div><div class="ck-ms" id="ckMs">.000</div></div>
-  <div class="ck-tz">INDOCHINA TIME · GMT +7:00</div>
-  <div class="hijri-row">
-    <div><div class="hijri-l">ISLAMIC DATE</div><div class="hijri-v" id="hijriV">—</div></div>
-    <div id="hijriB"></div>
-  </div>
+
+<div class="card">
+<div class="lbl">BANGKOK TIME · GMT+7</div>
+<div class="big" id="clock">--:--:--</div>
+<div id="date" style="margin-top:6px;color:var(--muted)"></div>
 </div>
-<div class="card s s3">
-  <div class="lbl">ทองคำไทย <span class="badge">96.5%</span></div>
-  <div class="tg-big" id="thaiP">฿--,---</div>
-  <div class="tg-unit">BAHT-WEIGHT · 15.244g · 96.5% PURITY</div>
-  <div class="tg-row">
-    <span>Spot <span id="tgS">$--</span></span>
-    <span>Rate <span id="tgR">--</span> THB</span>
-    <span>XAU/THB <span id="tgX">฿--</span></span>
-  </div>
-</div>
-<div class="card s s4">
-  <div class="lbl">XAUUSD <span class="badge" id="trendB">—</span></div>
-  <div class="spot-big" id="spotV">$--,---</div>
-  <div class="spot-chg" id="spotC">-- · --%</div>
-</div>
-<div class="card s s5">
-  <div class="lbl">TradingView · XAUUSD</div>
-  <div class="tv"><iframe src="https://s.tradingview.com/widgetembed/?symbol=OANDA%3AXAUUSD&interval=D&theme=dark&style=1&locale=th&allow_symbol_change=0" width="100%" height="100%" frameborder="0" scrolling="no"></iframe></div>
+
+<div class="card">
+<div class="lbl">THAI GOLD · 96.5%</div>
+<div class="gold-big" id="thaiPrice">฿--,---</div>
+<div class="row">
+<span>Spot <span id="spot">$--</span></span>
+<span>USDTHB <span id="usdthb">--</span></span>
 </div>
 </div>
+
+<div class="card">
+<div class="lbl">XAUUSD · 1H</div>
+<div class="big" id="spotMain">$--,---</div>
+<div id="spotChange" style="margin-top:6px"></div>
+</div>
+
+<div class="card">
+<div class="lbl">TradingView</div>
+<iframe src="https://s.tradingview.com/widgetembed/?symbol=OANDA%3AXAUUSD&interval=60&theme=dark&style=1&locale=th&allow_symbol_change=0"></iframe>
+</div>
+
+</div>
+
 <script>
 const pad=n=>String(n).padStart(2,'0');
-const DAYS=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-const MON=['January','February','March','April','May','June','July','August','September','October','November','December'];
-const HM=['Muharram','Safar','Rabi al-Awwal','Rabi al-Thani','Jumada al-Awwal','Jumada al-Thani','Rajab',"Sha'ban",'Ramadan','Shawwal','Dhu al-Qidah','Dhu al-Hijjah'];
-function hijri(){
-  const now=new Date(),jd=Math.floor(now.getTime()/86400000+2440587.5);
-  const l=jd+68569,n=Math.floor(4*l/146097),l2=l-Math.floor((146097*n+3)/4);
-  const i=Math.floor(4000*(l2+1)/1461001),l3=l2-Math.floor(1461*i/4)+31,j=Math.floor(80*l3/2447);
-  const day=l3-Math.floor(2447*j/80),l4=Math.floor(j/11),month=j+2-12*l4;
-  const year=100*(n-49)+i+l4;
-  return{day,month,year,name:HM[month-1],isRamadan:month===9};
+
+function updateClock(){
+const now=new Date();
+const bkk=new Date(now.getTime()+(7*60+now.getTimezoneOffset())*60000);
+const h=pad(bkk.getHours());
+const m=pad(bkk.getMinutes());
+const s=pad(bkk.getSeconds());
+document.getElementById('clock').textContent=`${h}:${m}:${s}`;
+document.getElementById('date').textContent=bkk.toDateString();
 }
-function clock(){
-  const now=new Date(),ms=now.getMilliseconds();
-  const bkk=new Date(now.getTime()+(7*60+now.getTimezoneOffset())*60000);
-  const h=pad(bkk.getHours()),m=pad(bkk.getMinutes()),s=pad(bkk.getSeconds());
-  document.getElementById('ckT').textContent=h+':'+m+':'+s;
-  document.getElementById('ckMs').textContent='.'+String(ms).padStart(3,'0');
-  document.getElementById('ckD').textContent=DAYS[bkk.getDay()]+', '+bkk.getDate()+' '+MON[bkk.getMonth()]+' '+bkk.getFullYear();
-  document.getElementById('sbT').textContent=h+':'+m;
-  const hj=hijri();
-  document.getElementById('hijriV').textContent=hj.day+' '+hj.name+' '+hj.year+' AH';
-  document.getElementById('hijriB').innerHTML=hj.isRamadan?'<span class="ramadan">🌙 RAMADAN</span>':'<span style="font-size:.43rem;color:var(--st)">'+hj.name+'</span>';
-}
-setInterval(clock,100);clock();
+setInterval(updateClock,1000);
+updateClock();
+
 async function loadGold(){
-  try{
-    const d=await fetch('/api/gold').then(r=>r.json());
-    const up=d.ch>=0;
-    document.getElementById('thaiP').textContent='฿'+(d.thai||0).toLocaleString();
-    document.getElementById('tgS').textContent='$'+(d.price||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
-    document.getElementById('tgR').textContent=(d.usdthb||0).toFixed(2);
-    document.getElementById('tgX').textContent='฿'+(d.xauThb||0).toLocaleString();
-    document.getElementById('spotV').textContent='$'+(d.price||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
-    document.getElementById('spotV').className='spot-big '+(up?'up':'dn');
-    document.getElementById('spotC').textContent=(up?'+':'')+d.ch.toFixed(2)+' · '+(up?'+':'')+d.chp.toFixed(2)+'%';
-    document.getElementById('spotC').className='spot-chg '+(up?'up':'dn');
-    document.getElementById('trendB').textContent=up?'▲ BULLISH':'▼ BEARISH';
-  }catch(e){console.error(e);}
+try{
+
+// 🔴 ใส่ API key ใหม่ของคุณ
+const GOLD_KEY="YOUR_NEW_GOLDAPI_KEY";
+
+const goldRes=await fetch("https://www.goldapi.io/api/XAU/USD",{
+headers:{'x-access-token':GOLD_KEY}
+});
+const goldData=await goldRes.json();
+const spot=goldData.price;
+
+const fxRes=await fetch("https://api.exchangerate.host/latest?base=USD&symbols=THB");
+const fxData=await fxRes.json();
+const usdthb=fxData.rates.THB;
+
+// สูตรทองไทยจริง
+const BAHT_WEIGHT=15.244;
+const PURITY=0.965;
+const TROY=31.1035;
+const PREMIUM=1.2;
+
+const thai=((spot+PREMIUM)*usdthb*BAHT_WEIGHT*PURITY)/TROY;
+
+document.getElementById('thaiPrice').textContent="฿"+Math.round(thai).toLocaleString();
+document.getElementById('spot').textContent="$"+spot.toFixed(2);
+document.getElementById('usdthb').textContent=usdthb.toFixed(2);
+document.getElementById('spotMain').textContent="$"+spot.toFixed(2);
+
+const up=goldData.ch>=0;
+document.getElementById('spotChange').textContent=
+(up?"+":"")+goldData.ch.toFixed(2)+" ("+
+(up?"+":"")+goldData.chp.toFixed(2)+"%)";
+document.getElementById('spotChange').className=up?"up":"dn";
+
+}catch(e){
+console.error("Gold Load Error",e);
 }
+}
+
 loadGold();
 setInterval(loadGold,60000);
 </script>
+
 </body>
 </html>
