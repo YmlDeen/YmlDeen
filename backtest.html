@@ -3,32 +3,52 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Backtest Terminal</title>
+<title>Backtest Pro Engine</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+
 <style>
+*{margin:0;padding:0;box-sizing:border-box}
 body{
     font-family:'Inter',sans-serif;
-    background:linear-gradient(135deg,#1e3c72,#2a5298);
+    background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
     display:flex;
     justify-content:center;
     align-items:center;
-    height:100vh;
+    min-height:100vh;
     color:white;
 }
 
 .container{
     width:100%;
-    max-width:480px;
+    max-width:520px;
     padding:30px;
     background:rgba(255,255,255,0.08);
     backdrop-filter:blur(25px);
     border-radius:25px;
-    box-shadow:0 20px 40px rgba(0,0,0,.4);
+    box-shadow:0 20px 40px rgba(0,0,0,.5);
 }
 
-.title{text-align:center;font-weight:800;margin-bottom:20px;}
-.price{text-align:center;font-size:36px;margin-bottom:20px;}
-.status{text-align:center;margin-bottom:15px;opacity:.8;}
+.title{
+    text-align:center;
+    font-size:22px;
+    font-weight:800;
+    margin-bottom:20px;
+}
+
+.price{
+    text-align:center;
+    font-size:40px;
+    font-weight:800;
+    margin-bottom:10px;
+}
+
+.change{
+    text-align:center;
+    margin-bottom:20px;
+}
+
+.up{color:#00ffcc;text-shadow:0 0 15px #00ffcc;}
+.down{color:#ff4d88;text-shadow:0 0 15px #ff4d88;}
 
 .button-group{
     display:flex;
@@ -43,11 +63,20 @@ button{
     border-radius:14px;
     font-weight:700;
     cursor:pointer;
+    transition:.3s;
 }
 
 .buy{background:#00ffcc;color:#111;}
 .sell{background:#ff4d88;color:#fff;}
 .close{background:#ffffff33;color:#fff;}
+
+button:hover{transform:translateY(-4px);}
+
+.status{
+    text-align:center;
+    margin-bottom:15px;
+    font-size:14px;
+}
 
 .stats{
     background:rgba(255,255,255,0.15);
@@ -61,21 +90,145 @@ button{
 <body>
 
 <div class="container">
-<div class="title">Backtest Terminal</div>
-<div class="price">$--</div>
-<div class="status">Demo Mode</div>
+
+<div class="title">Backtest Pro Engine</div>
+
+<div class="price" id="price">$--</div>
+<div class="change" id="change">--</div>
+
+<div class="status" id="status">No Position</div>
 
 <div class="button-group">
-<button class="buy">BUY</button>
-<button class="sell">SELL</button>
-<button class="close">CLOSE</button>
+<button class="buy" onclick="openTrade('long')">BUY</button>
+<button class="sell" onclick="openTrade('short')">SELL</button>
+<button class="close" onclick="closeTrade()">CLOSE</button>
 </div>
 
-<div class="stats">
-Ready for strategy testing.
-</div>
+<div class="stats" id="stats"></div>
 
 </div>
+
+<script>
+
+let trades = JSON.parse(localStorage.getItem("bt_trades")) || [];
+let currentTrade = null;
+let equity = 0;
+let currentPrice = 0;
+let currentChange = 0;
+
+/* ===== Fetch Live Gold ===== */
+function updatePrice(){
+    fetch('/api/gold')
+    .then(res=>res.json())
+    .then(d=>{
+        currentPrice = d.price || 0;
+        currentChange = d.ch || 0;
+
+        const priceEl = document.getElementById("price");
+        const changeEl = document.getElementById("change");
+
+        priceEl.textContent = "$" + currentPrice.toFixed(2);
+        changeEl.textContent =
+            (d.ch>=0?"+":"") + d.ch.toFixed(2) +
+            " (" + (d.ch>=0?"+":"") + d.chp.toFixed(2) + "%)";
+
+        priceEl.classList.remove("up","down");
+        changeEl.classList.remove("up","down");
+
+        if(d.ch>=0){
+            priceEl.classList.add("up");
+            changeEl.classList.add("up");
+        }else{
+            priceEl.classList.add("down");
+            changeEl.classList.add("down");
+        }
+
+        if(currentTrade){
+            updateFloatingPnL();
+        }
+    });
+}
+
+/* ===== Open Trade ===== */
+function openTrade(type){
+    if(currentTrade || !currentPrice) return;
+
+    currentTrade = {
+        type:type,
+        entry:currentPrice
+    };
+
+    document.getElementById("status").textContent =
+        type === "long"
+        ? "OPEN LONG @ " + currentPrice.toFixed(2)
+        : "OPEN SHORT @ " + currentPrice.toFixed(2);
+}
+
+/* ===== Floating PnL ===== */
+function updateFloatingPnL(){
+    let pnl = 0;
+
+    if(currentTrade.type === "long"){
+        pnl = currentPrice - currentTrade.entry;
+    }else{
+        pnl = currentTrade.entry - currentPrice;
+    }
+
+    document.getElementById("status").textContent =
+        currentTrade.type.toUpperCase() +
+        " | Entry: " + currentTrade.entry.toFixed(2) +
+        " | Floating P/L: " + pnl.toFixed(2);
+}
+
+/* ===== Close Trade ===== */
+function closeTrade(){
+    if(!currentTrade) return;
+
+    let pnl = 0;
+
+    if(currentTrade.type === "long"){
+        pnl = currentPrice - currentTrade.entry;
+    }else{
+        pnl = currentTrade.entry - currentPrice;
+    }
+
+    equity += pnl;
+
+    trades.push({
+        type:currentTrade.type,
+        entry:currentTrade.entry,
+        close:currentPrice,
+        pnl:pnl
+    });
+
+    localStorage.setItem("bt_trades", JSON.stringify(trades));
+
+    currentTrade = null;
+    document.getElementById("status").textContent = "No Position";
+
+    calculateStats();
+}
+
+/* ===== Stats ===== */
+function calculateStats(){
+    const total = trades.length;
+    const wins = trades.filter(t=>t.pnl>0);
+    const winrate = total ? (wins.length/total*100).toFixed(1) : 0;
+    const net = trades.reduce((a,b)=>a+b.pnl,0).toFixed(2);
+
+    document.getElementById("stats").innerHTML = `
+    Total Trades: ${total}<br>
+    Winrate: ${winrate}%<br>
+    Net P/L: ${net}<br>
+    Equity: ${equity.toFixed(2)}
+    `;
+}
+
+updatePrice();
+calculateStats();
+setInterval(updatePrice,5000);
+
+</script>
 
 </body>
 </html>
