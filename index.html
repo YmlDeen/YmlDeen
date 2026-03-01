@@ -68,7 +68,6 @@ body::before{
 .chart{grid-column:1/-1;}
 iframe{width:100%;height:420px;border:none;border-radius:18px;}
 
-/* ===== PREMIUM BUTTON ===== */
 .backtest-wrap{
     grid-column:1/-1;
     display:flex;
@@ -125,7 +124,7 @@ iframe{width:100%;height:420px;border:none;border-radius:18px;}
 </div>
 
 <div class="backtest-wrap">
-<a href="backtest" class="backtest-btn">
+<a href="/backtest" class="backtest-btn">
 🚀 Launch Backtest Terminal
 </a>
 </div>
@@ -133,6 +132,8 @@ iframe{width:100%;height:420px;border:none;border-radius:18px;}
 </div>
 
 <script>
+
+/* Clock */
 function updateClock(){
     const now = new Date();
     document.getElementById("clock").textContent =
@@ -140,6 +141,54 @@ function updateClock(){
 }
 setInterval(updateClock,1000);
 updateClock();
+
+/* Load Gold */
+async function loadGold(){
+    try{
+        const res = await fetch('/api/gold');
+        const d = await res.json();
+
+        document.getElementById('thaiPrice').textContent =
+            "฿" + (d.thai || 0).toLocaleString();
+
+        const spot = document.getElementById('spotPrice');
+        const change = document.getElementById('spotChange');
+
+        const price = (typeof d.price === "number")
+            ? d.price.toFixed(2)
+            : "0.00";
+
+        spot.textContent = "$" + price;
+
+        const ch = (typeof d.ch === "number") ? d.ch : 0;
+        const chp = (typeof d.chp === "number") ? d.chp : 0;
+
+        change.textContent =
+            (ch >= 0 ? "+" : "") + ch.toFixed(2) +
+            " (" + (ch >= 0 ? "+" : "") + chp.toFixed(2) + "%)";
+
+        spot.classList.remove("up","down");
+        change.classList.remove("up","down");
+
+        if(ch >= 0){
+            spot.classList.add("up");
+            change.classList.add("up");
+        }else{
+            spot.classList.add("down");
+            change.classList.add("down");
+        }
+
+        document.getElementById('usdRate').textContent =
+            (d.usdthb || 0).toFixed(2);
+
+    }catch(e){
+        console.log("API ERROR:", e);
+    }
+}
+
+loadGold();
+setInterval(loadGold,15000);
+
 </script>
 
 </body>
