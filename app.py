@@ -5,28 +5,42 @@ import time
 
 app = Flask(__name__)
 
-# ✅ ดึง key จาก Environment Variable
 GOLD_API_KEY = os.environ.get("GOLD_API_KEY")
 
 if not GOLD_API_KEY:
     raise ValueError("GOLD_API_KEY not set in Environment Variables")
 
-# Cache กัน API ล่ม
 CACHE = {
     "data": None,
     "timestamp": 0
 }
 
-CACHE_TTL = 60  # วินาที
+CACHE_TTL = 60
+
+def get_usdthb():
+    try:
+        res = requests.get(
+            "https://api.frankfurter.app/latest?from=USD&to=THB",
+            timeout=8
+        )
+        res.raise_for_status()
+        return res.json()["rates"]["THB"]
+    except:
+        try:
+            res = requests.get(
+                "https://open.er-api.com/v6/latest/USD",
+                timeout=8
+            )
+            res.raise_for_status()
+            return res.json()["rates"]["THB"]
+        except:
+            return 33.5
 
 def fetch_gold():
-
-    # ใช้ cache ถ้ายังไม่หมดเวลา
     if CACHE["data"] and time.time() - CACHE["timestamp"] < CACHE_TTL:
         return CACHE["data"]
 
     try:
-        # 1️⃣ ดึง Spot Gold
         gold_res = requests.get(
             "https://www.goldapi.io/api/XAU/USD",
             headers={"x-access-token": GOLD_API_KEY},
@@ -39,19 +53,12 @@ def fetch_gold():
         ch   = gold_data.get("ch", 0)
         chp  = gold_data.get("chp", 0)
 
-        # 2️⃣ ดึง USDTHB
-        fx_res = requests.get(
-            "https://api.exchangerate.host/latest?base=USD&symbols=THB",
-            timeout=8
-        )
-        fx_res.raise_for_status()
-        usdthb = fx_res.json()["rates"]["THB"]
+        usdthb = get_usdthb()
 
-        # 3️⃣ สูตรทองไทย 96.5%
         BAHT_WEIGHT = 15.244
         PURITY = 0.965
         TROY = 31.1035
-        PREMIUM = 1.2  # ปรับทีละ 0.1 ถ้าต้องการจูน
+        PREMIUM = 1.2
 
         thai = ((spot + PREMIUM) * usdthb * BAHT_WEIGHT * PURITY) / TROY
 
@@ -70,7 +77,6 @@ def fetch_gold():
         return result
 
     except Exception as e:
-        # ถ้า API ล่ม ใช้ค่าล่าสุดแทน
         if CACHE["data"]:
             return CACHE["data"]
 
@@ -91,3 +97,6 @@ def index():
 @app.route("/api/gold")
 def gold():
     return jsonify(fetch_gold())
+
+if __name__ == "__main__":
+    app.run(debug=True)
