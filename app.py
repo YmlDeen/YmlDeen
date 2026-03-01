@@ -97,6 +97,9 @@ def index():
 @app.route("/api/gold")
 def gold():
     return jsonify(fetch_gold())
+@app.route("/backtest")
+def backtest():
+    return open("backtest.html", encoding="utf-8").read()
 
 if __name__ == "__main__":
     app.run(debug=True)
