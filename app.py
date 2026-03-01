@@ -1,39 +1,77 @@
 from flask import Flask, jsonify
-import urllib.request
-import json
-import math
+import requests
+import os
+import time
 
 app = Flask(__name__)
 
-GOLD_API_KEY = 'goldapi-1kvaizsmm14nx8l-io'
-USD_THB = 34.82
+# ดึง key จาก Render โดยอัตโนมัติ
+GOLD_API_KEY = os.environ.get("goldapi-1kvaizsmm14nx8l-io")
+
+CACHE = {"data": None, "timestamp": 0}
+CACHE_TTL = 60
 
 def fetch_gold():
+
+    if CACHE["data"] and time.time() - CACHE["timestamp"] < CACHE_TTL:
+        return CACHE["data"]
+
     try:
-        req = urllib.request.Request(
-            'https://www.goldapi.io/api/XAU/USD',
-            headers={'x-access-token': GOLD_API_KEY}
+        gold_res = requests.get(
+            "https://www.goldapi.io/api/XAU/USD",
+            headers={"x-access-token": GOLD_API_KEY},
+            timeout=8
         )
-        with urllib.request.urlopen(req, timeout=8) as res:
-            data = json.loads(res.read())
-            price = data.get('price', 0)
-            ch    = data.get('ch', 0)
-            chp   = data.get('chp', 0)
-            thai  = round(price * USD_THB * 0.9653 * 0.4729)
-            return {'price': price, 'ch': ch, 'chp': chp,
-                    'thai': thai, 'usdthb': USD_THB,
-                    'xauThb': round(price * USD_THB)}
+        gold_res.raise_for_status()
+        gold_data = gold_res.json()
+
+        spot = gold_data.get("price", 0)
+        ch   = gold_data.get("ch", 0)
+        chp  = gold_data.get("chp", 0)
+
+        fx_res = requests.get(
+            "https://api.exchangerate.host/latest?base=USD&symbols=THB",
+            timeout=8
+        )
+        fx_res.raise_for_status()
+        usdthb = fx_res.json()["rates"]["THB"]
+
+        BAHT_WEIGHT = 15.244
+        PURITY = 0.965
+        TROY = 31.1035
+        PREMIUM = 1.2
+
+        thai = ((spot + PREMIUM) * usdthb * BAHT_WEIGHT * PURITY) / TROY
+
+        result = {
+            "price": spot,
+            "usdthb": usdthb,
+            "thai": round(thai),
+            "xauThb": round(spot * usdthb),
+            "ch": ch,
+            "chp": chp
+        }
+
+        CACHE["data"] = result
+        CACHE["timestamp"] = time.time()
+
+        return result
+
     except Exception as e:
-        return {'price': 0, 'ch': 0, 'chp': 0,
-                'thai': 0, 'usdthb': USD_THB, 'xauThb': 0, 'error': str(e)}
+        return {
+            "price": 0,
+            "usdthb": 0,
+            "thai": 0,
+            "xauThb": 0,
+            "ch": 0,
+            "chp": 0,
+            "error": str(e)
+        }
 
-@app.route('/')
+@app.route("/")
 def index():
-    return open('index.html', encoding='utf-8').read()
+    return open("index.html", encoding="utf-8").read()
 
-@app.route('/api/gold')
+@app.route("/api/gold")
 def gold():
     return jsonify(fetch_gold())
-
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=10000)
