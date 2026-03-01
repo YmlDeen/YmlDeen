@@ -3,49 +3,32 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Gold Backtest Terminal</title>
+<title>Backtest Terminal</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
 body{
     font-family:'Inter',sans-serif;
     background:linear-gradient(135deg,#1e3c72,#2a5298);
-    min-height:100vh;
     display:flex;
     justify-content:center;
     align-items:center;
+    height:100vh;
     color:white;
 }
 
-/* Glass card */
 .container{
     width:100%;
     max-width:480px;
     padding:30px;
     background:rgba(255,255,255,0.08);
     backdrop-filter:blur(25px);
-    border:1px solid rgba(255,255,255,0.2);
     border-radius:25px;
     box-shadow:0 20px 40px rgba(0,0,0,.4);
 }
 
-.title{
-    text-align:center;
-    font-size:22px;
-    font-weight:800;
-    margin-bottom:20px;
-}
-
-.price{
-    text-align:center;
-    font-size:36px;
-    font-weight:800;
-    margin-bottom:20px;
-}
-
-.up{color:#00ffcc;text-shadow:0 0 15px #00ffcc;}
-.down{color:#ff4d88;text-shadow:0 0 15px #ff4d88;}
+.title{text-align:center;font-weight:800;margin-bottom:20px;}
+.price{text-align:center;font-size:36px;margin-bottom:20px;}
+.status{text-align:center;margin-bottom:15px;opacity:.8;}
 
 .button-group{
     display:flex;
@@ -60,23 +43,11 @@ button{
     border-radius:14px;
     font-weight:700;
     cursor:pointer;
-    transition:.3s;
 }
 
 .buy{background:#00ffcc;color:#111;}
 .sell{background:#ff4d88;color:#fff;}
 .close{background:#ffffff33;color:#fff;}
-
-button:hover{
-    transform:translateY(-4px);
-}
-
-.status{
-    text-align:center;
-    margin-bottom:15px;
-    font-size:14px;
-    opacity:.8;
-}
 
 .stats{
     background:rgba(255,255,255,0.15);
@@ -84,128 +55,27 @@ button:hover{
     border-radius:15px;
     font-size:14px;
 }
-
-.link{
-    display:block;
-    text-align:center;
-    margin-top:20px;
-    color:white;
-    text-decoration:none;
-    opacity:.7;
-}
 </style>
 </head>
 
 <body>
 
 <div class="container">
-
 <div class="title">Backtest Terminal</div>
-
-<div class="price" id="price">--</div>
-
-<div class="status" id="status">No Position</div>
+<div class="price">$--</div>
+<div class="status">Demo Mode</div>
 
 <div class="button-group">
-<button class="buy" onclick="openTrade('long')">BUY</button>
-<button class="sell" onclick="openTrade('short')">SELL</button>
-<button class="close" onclick="closeTrade()">CLOSE</button>
+<button class="buy">BUY</button>
+<button class="sell">SELL</button>
+<button class="close">CLOSE</button>
 </div>
 
-<div class="stats" id="stats"></div>
-
-<a href="index.html" class="link">← Back to Gold Control Center</a>
-
+<div class="stats">
+Ready for strategy testing.
 </div>
 
-<script>
-
-let trades = JSON.parse(localStorage.getItem("bt_trades")) || [];
-let currentTrade = null;
-let equity = 0;
-
-function updatePrice(){
-    fetch('/api/gold')
-    .then(res=>res.json())
-    .then(d=>{
-        const priceEl = document.getElementById("price");
-        const p = d.price ? d.price.toFixed(2) : "--";
-        priceEl.textContent = "$" + p;
-
-        if(d.ch >= 0){
-            priceEl.classList.add("up");
-            priceEl.classList.remove("down");
-        }else{
-            priceEl.classList.add("down");
-            priceEl.classList.remove("up");
-        }
-    })
-    .catch(()=>{});
-}
-
-function openTrade(type){
-    if(currentTrade) return;
-
-    const price = parseFloat(document.getElementById("price").textContent.replace("$",""));
-    if(!price) return;
-
-    currentTrade = { type:type, entry:price };
-
-    document.getElementById("status").textContent =
-        type === "long"
-        ? "OPEN LONG @ " + price
-        : "OPEN SHORT @ " + price;
-}
-
-function closeTrade(){
-    if(!currentTrade) return;
-
-    const closePrice = parseFloat(document.getElementById("price").textContent.replace("$",""));
-    let pnl = 0;
-
-    if(currentTrade.type === "long"){
-        pnl = closePrice - currentTrade.entry;
-    }else{
-        pnl = currentTrade.entry - closePrice;
-    }
-
-    equity += pnl;
-
-    trades.push({
-        type:currentTrade.type,
-        entry:currentTrade.entry,
-        close:closePrice,
-        pnl:pnl
-    });
-
-    localStorage.setItem("bt_trades", JSON.stringify(trades));
-
-    currentTrade = null;
-    document.getElementById("status").textContent = "No Position";
-
-    calculateStats();
-}
-
-function calculateStats(){
-    const total = trades.length;
-    const wins = trades.filter(t=>t.pnl>0);
-
-    const winrate = total ? (wins.length/total*100).toFixed(1) : 0;
-    const net = trades.reduce((a,b)=>a+b.pnl,0).toFixed(2);
-
-    document.getElementById("stats").innerHTML = `
-    Total Trades: ${total}<br>
-    Winrate: ${winrate}%<br>
-    Net P/L: ${net}<br>
-    Equity: ${equity.toFixed(2)}
-    `;
-}
-
-updatePrice();
-calculateStats();
-setInterval(updatePrice,10000);
-
-</script>
+</div>
 
 </body>
 </html>
