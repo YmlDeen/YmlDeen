@@ -3,133 +3,143 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Gold Explorer Terminal</title>
-<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&display=swap" rel="stylesheet">
-<style>
+<title>Gold Control Center</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
 body{
-    margin:0;
-    font-family:'Fredoka',sans-serif;
-    background: radial-gradient(circle at top,#2b2e63,#14162e);
+    font-family:'Inter',sans-serif;
+    background:linear-gradient(135deg,#1e3c72,#2a5298);
+    min-height:100vh;
     color:white;
-    display:flex;
-    justify-content:center;
+    overflow-x:hidden;
+}
+
+/* Ambient Light */
+body::before{
+    content:"";
+    position:fixed;
+    width:700px;
+    height:700px;
+    background:radial-gradient(circle,#6a8dff55,transparent);
+    top:-200px;
+    left:-200px;
+    animation:moveLight 12s infinite alternate ease-in-out;
+    z-index:0;
+}
+@keyframes moveLight{
+    from{transform:translate(0,0)}
+    to{transform:translate(200px,150px)}
 }
 
 .container{
-    width:100%;
-    max-width:420px;
-    padding:20px;
+    position:relative;
+    z-index:1;
+    max-width:1100px;
+    margin:auto;
+    padding:40px 20px;
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+    gap:25px;
 }
 
-.hero{
-    background:linear-gradient(145deg,#ffd76b,#ffb700);
-    border-radius:30px;
-    padding:30px;
-    text-align:center;
-    box-shadow:0 20px 40px rgba(0,0,0,.5);
-    transform:perspective(1000px) rotateX(8deg);
-}
-
-.hero h1{
-    font-size:40px;
-    margin:0;
-    color:#222;
-}
-
-.hero p{
-    margin:10px 0 0;
-    font-weight:600;
-    color:#333;
-}
+.header{grid-column:1/-1;text-align:center;}
+.header h1{font-size:32px;font-weight:800;}
+.clock{margin-top:10px;font-size:14px;opacity:.7;}
 
 .card{
-    margin-top:25px;
-    background:linear-gradient(145deg,#3a3d6a,#26284b);
-    padding:25px;
+    background:rgba(255,255,255,0.08);
+    backdrop-filter:blur(25px);
+    border:1px solid rgba(255,255,255,0.2);
     border-radius:25px;
-    box-shadow:0 15px 30px rgba(0,0,0,.6);
-    transform:perspective(1000px) rotateX(6deg);
+    padding:30px;
+    box-shadow:0 20px 40px rgba(0,0,0,.4);
+    transition:.3s ease;
 }
+.card:hover{transform:translateY(-10px);}
 
-.label{
-    font-size:14px;
-    opacity:.7;
-    margin-bottom:10px;
-}
+.big{font-size:42px;font-weight:800;}
+.sub{margin-top:10px;font-size:14px;opacity:.6;}
 
-.price{
-    font-size:34px;
-    font-weight:600;
-    color:#ffd76b;
-}
+.up{color:#00ffcc;text-shadow:0 0 15px #00ffcc;}
+.down{color:#ff4d88;text-shadow:0 0 15px #ff4d88;}
 
-.mascot{
-    text-align:center;
-    font-size:50px;
-    margin-top:20px;
-}
+.chart{grid-column:1/-1;}
+iframe{width:100%;height:420px;border:none;border-radius:18px;}
 
-.footer{
+/* ===== PREMIUM BUTTON ===== */
+.backtest-wrap{
+    grid-column:1/-1;
+    display:flex;
+    justify-content:center;
     margin-top:30px;
-    text-align:center;
-    opacity:.5;
-    font-size:12px;
 }
 
+.backtest-btn{
+    padding:16px 36px;
+    font-weight:700;
+    letter-spacing:1px;
+    text-transform:uppercase;
+    border-radius:18px;
+    background:linear-gradient(135deg,#00ffcc,#00b3ff);
+    color:white;
+    text-decoration:none;
+    box-shadow:0 0 20px #00ffcc88,0 0 40px #00b3ff55;
+    transition:.4s ease;
+}
+.backtest-btn:hover{
+    transform:translateY(-8px) scale(1.05);
+    box-shadow:0 0 40px #00ffcc,0 0 80px #00b3ff;
+}
 </style>
 </head>
+
 <body>
 
 <div class="container">
 
-<div class="hero">
-    <h1 id="thaiPrice">฿--</h1>
-    <p>Thai Gold 96.5%</p>
+<div class="header">
+<h1>Gold Control Center</h1>
+<div class="clock" id="clock"></div>
 </div>
 
 <div class="card">
-    <div class="label">Gold Spot</div>
-    <div class="price" id="spotPrice">$--</div>
+<div class="big" id="thaiPrice">฿--</div>
+<div class="sub">Thai Gold 96.5%</div>
 </div>
 
 <div class="card">
-    <div class="label">USD / THB</div>
-    <div class="price" id="usdRate">--</div>
+<div class="big" id="spotPrice">$--</div>
+<div class="sub" id="spotChange">--</div>
 </div>
 
-<div class="mascot">
-🪐✨
+<div class="card">
+<div class="big" id="usdRate">--</div>
+<div class="sub">USD / THB</div>
 </div>
 
-<div class="footer">
-Gold Explorer · 3D Cartoon UI
+<div class="card chart">
+<div class="sub" style="margin-bottom:15px">Live Market Chart</div>
+<iframe src="https://s.tradingview.com/widgetembed/?symbol=OANDA%3AXAUUSD&interval=60&theme=dark&style=1&locale=en&allow_symbol_change=0"></iframe>
+</div>
+
+<div class="backtest-wrap">
+<a href="backtest.html" class="backtest-btn">
+🚀 Launch Backtest Terminal
+</a>
 </div>
 
 </div>
 
 <script>
-async function loadGold(){
-    try{
-        const res = await fetch('/api/gold');
-        const d = await res.json();
-
-        document.getElementById('thaiPrice').textContent =
-            "฿" + (d.thai || 0).toLocaleString();
-
-        document.getElementById('spotPrice').textContent =
-            "$" + (d.price || 0).toFixed(2);
-
-        document.getElementById('usdRate').textContent =
-            (d.usdthb || 0).toFixed(2);
-
-    }catch(e){
-        console.error(e);
-    }
+function updateClock(){
+    const now = new Date();
+    document.getElementById("clock").textContent =
+        "Bangkok Time · " + now.toLocaleTimeString('en-GB',{timeZone:'Asia/Bangkok'});
 }
-
-loadGold();
-setInterval(loadGold,60000);
+setInterval(updateClock,1000);
+updateClock();
 </script>
 
 </body>
