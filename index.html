@@ -2,156 +2,130 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Bangkok Gold Terminal · YmlDeen</title>
-
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;600&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gold Explorer Terminal</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&display=swap" rel="stylesheet">
 <style>
-*{margin:0;padding:0;box-sizing:border-box;-webkit-font-smoothing:antialiased}
-:root{
---bg:#0C0D0F;--card:#131417;--gold:#D4B96A;
---text:#F0EDE4;--muted:#6E7480;
---green:#3A9B6A;--red:#B46050;
---border:rgba(240,237,228,.07)
-}
+
 body{
-background:var(--bg);
-color:var(--text);
-font-family:'DM Mono',monospace;
-display:flex;
-justify-content:center;
-min-height:100vh
+    margin:0;
+    font-family:'Fredoka',sans-serif;
+    background: radial-gradient(circle at top,#2b2e63,#14162e);
+    color:white;
+    display:flex;
+    justify-content:center;
 }
-.page{width:100%;max-width:420px;padding:20px 14px 60px}
+
+.container{
+    width:100%;
+    max-width:420px;
+    padding:20px;
+}
+
+.hero{
+    background:linear-gradient(145deg,#ffd76b,#ffb700);
+    border-radius:30px;
+    padding:30px;
+    text-align:center;
+    box-shadow:0 20px 40px rgba(0,0,0,.5);
+    transform:perspective(1000px) rotateX(8deg);
+}
+
+.hero h1{
+    font-size:40px;
+    margin:0;
+    color:#222;
+}
+
+.hero p{
+    margin:10px 0 0;
+    font-weight:600;
+    color:#333;
+}
 
 .card{
-background:var(--card);
-border:1px solid var(--border);
-border-radius:16px;
-padding:18px;
-margin-bottom:12px
+    margin-top:25px;
+    background:linear-gradient(145deg,#3a3d6a,#26284b);
+    padding:25px;
+    border-radius:25px;
+    box-shadow:0 15px 30px rgba(0,0,0,.6);
+    transform:perspective(1000px) rotateX(6deg);
 }
 
-.lbl{
-font-size:.6rem;
-letter-spacing:.25em;
-color:var(--gold);
-margin-bottom:12px
+.label{
+    font-size:14px;
+    opacity:.7;
+    margin-bottom:10px;
 }
 
-.big{
-font-family:'Cormorant Garamond',serif;
-font-size:3rem;
-font-weight:300
+.price{
+    font-size:34px;
+    font-weight:600;
+    color:#ffd76b;
 }
 
-.gold-big{
-font-family:'Cormorant Garamond',serif;
-font-size:4rem;
-font-weight:600;
-color:var(--gold)
+.mascot{
+    text-align:center;
+    font-size:50px;
+    margin-top:20px;
 }
 
-.row{
-display:flex;
-justify-content:space-between;
-margin-top:10px;
-font-size:.8rem;
-color:var(--muted)
+.footer{
+    margin-top:30px;
+    text-align:center;
+    opacity:.5;
+    font-size:12px;
 }
 
-.up{color:var(--green)}
-.dn{color:var(--red)}
-
-iframe{border-radius:12px;width:100%;height:300px}
 </style>
 </head>
 <body>
 
-<div class="page">
+<div class="container">
 
-<div class="card">
-<div class="lbl">BANGKOK TIME · GMT+7</div>
-<div class="big" id="clock">--:--:--</div>
-<div id="date" style="margin-top:6px;color:var(--muted)"></div>
+<div class="hero">
+    <h1 id="thaiPrice">฿--</h1>
+    <p>Thai Gold 96.5%</p>
 </div>
 
 <div class="card">
-<div class="lbl">THAI GOLD · 96.5%</div>
-<div class="gold-big" id="thaiPrice">฿--,---</div>
-<div class="row">
-<span>Spot <span id="spot">$--</span></span>
-<span>USDTHB <span id="usdthb">--</span></span>
-</div>
+    <div class="label">Gold Spot</div>
+    <div class="price" id="spotPrice">$--</div>
 </div>
 
 <div class="card">
-<div class="lbl">XAUUSD · 1H</div>
-<div class="big" id="spotMain">$--,---</div>
-<div id="spotChange" style="margin-top:6px"></div>
+    <div class="label">USD / THB</div>
+    <div class="price" id="usdRate">--</div>
 </div>
 
-<div class="card">
-<div class="lbl">TradingView</div>
-<iframe src="https://s.tradingview.com/widgetembed/?symbol=OANDA%3AXAUUSD&interval=60&theme=dark&style=1&locale=th&allow_symbol_change=0"></iframe>
+<div class="mascot">
+🪐✨
+</div>
+
+<div class="footer">
+Gold Explorer · 3D Cartoon UI
 </div>
 
 </div>
 
 <script>
-const pad=n=>String(n).padStart(2,'0');
-
-function updateClock(){
-const now=new Date();
-const bkk=new Date(now.getTime()+(7*60+now.getTimezoneOffset())*60000);
-const h=pad(bkk.getHours());
-const m=pad(bkk.getMinutes());
-const s=pad(bkk.getSeconds());
-document.getElementById('clock').textContent=`${h}:${m}:${s}`;
-document.getElementById('date').textContent=bkk.toDateString();
-}
-setInterval(updateClock,1000);
-updateClock();
-
 async function loadGold(){
-try{
+    try{
+        const res = await fetch('/api/gold');
+        const d = await res.json();
 
-// 🔴 ใส่ API key ใหม่ของคุณ
-const GOLD_KEY="YOUR_NEW_GOLDAPI_KEY";
+        document.getElementById('thaiPrice').textContent =
+            "฿" + (d.thai || 0).toLocaleString();
 
-const goldRes=await fetch("https://www.goldapi.io/api/XAU/USD",{
-headers:{'x-access-token':GOLD_KEY}
-});
-const goldData=await goldRes.json();
-const spot=goldData.price;
+        document.getElementById('spotPrice').textContent =
+            "$" + (d.price || 0).toFixed(2);
 
-const fxRes=await fetch("https://api.exchangerate.host/latest?base=USD&symbols=THB");
-const fxData=await fxRes.json();
-const usdthb=fxData.rates.THB;
+        document.getElementById('usdRate').textContent =
+            (d.usdthb || 0).toFixed(2);
 
-// สูตรทองไทยจริง
-const BAHT_WEIGHT=15.244;
-const PURITY=0.965;
-const TROY=31.1035;
-const PREMIUM=1.2;
-
-const thai=((spot+PREMIUM)*usdthb*BAHT_WEIGHT*PURITY)/TROY;
-
-document.getElementById('thaiPrice').textContent="฿"+Math.round(thai).toLocaleString();
-document.getElementById('spot').textContent="$"+spot.toFixed(2);
-document.getElementById('usdthb').textContent=usdthb.toFixed(2);
-document.getElementById('spotMain').textContent="$"+spot.toFixed(2);
-
-const up=goldData.ch>=0;
-document.getElementById('spotChange').textContent=
-(up?"+":"")+goldData.ch.toFixed(2)+" ("+
-(up?"+":"")+goldData.chp.toFixed(2)+"%)";
-document.getElementById('spotChange').className=up?"up":"dn";
-
-}catch(e){
-console.error("Gold Load Error",e);
-}
+    }catch(e){
+        console.error(e);
+    }
 }
 
 loadGold();
