@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Backtest Pro Engine</title>
+<title>Strategy Research Engine</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 
 <style>
@@ -11,224 +11,192 @@
 body{
     font-family:'Inter',sans-serif;
     background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    min-height:100vh;
     color:white;
-}
-
-.container{
-    width:100%;
-    max-width:520px;
     padding:30px;
-    background:rgba(255,255,255,0.08);
-    backdrop-filter:blur(25px);
-    border-radius:25px;
-    box-shadow:0 20px 40px rgba(0,0,0,.5);
 }
-
+.container{
+    max-width:900px;
+    margin:auto;
+}
 .title{
     text-align:center;
-    font-size:22px;
+    font-size:26px;
     font-weight:800;
+    margin-bottom:25px;
+}
+.panel{
+    background:rgba(255,255,255,0.08);
+    backdrop-filter:blur(25px);
+    padding:20px;
+    border-radius:20px;
     margin-bottom:20px;
 }
-
-.price{
-    text-align:center;
-    font-size:40px;
-    font-weight:800;
-    margin-bottom:10px;
-}
-
-.change{
-    text-align:center;
-    margin-bottom:20px;
-}
-
-.up{color:#00ffcc;text-shadow:0 0 15px #00ffcc;}
-.down{color:#ff4d88;text-shadow:0 0 15px #ff4d88;}
-
-.button-group{
-    display:flex;
-    justify-content:space-between;
-    margin-bottom:20px;
-}
-
-button{
-    width:32%;
-    padding:14px;
+input{
+    width:100%;
+    padding:10px;
+    margin:6px 0;
+    border-radius:10px;
     border:none;
-    border-radius:14px;
+}
+button{
+    padding:12px;
+    width:100%;
+    border:none;
+    border-radius:12px;
     font-weight:700;
     cursor:pointer;
-    transition:.3s;
+    background:#00ffcc;
 }
-
-.buy{background:#00ffcc;color:#111;}
-.sell{background:#ff4d88;color:#fff;}
-.close{background:#ffffff33;color:#fff;}
-
-button:hover{transform:translateY(-4px);}
-
-.status{
-    text-align:center;
-    margin-bottom:15px;
-    font-size:14px;
-}
-
 .stats{
-    background:rgba(255,255,255,0.15);
-    padding:15px;
-    border-radius:15px;
+    margin-top:15px;
     font-size:14px;
+}
+canvas{
+    background:#111;
+    border-radius:12px;
+    margin-top:15px;
 }
 </style>
 </head>
-
 <body>
 
 <div class="container">
 
-<div class="title">Backtest Pro Engine</div>
+<div class="title">EMA Strategy Research Tool</div>
 
-<div class="price" id="price">$--</div>
-<div class="change" id="change">--</div>
-
-<div class="status" id="status">No Position</div>
-
-<div class="button-group">
-<button class="buy" onclick="openTrade('long')">BUY</button>
-<button class="sell" onclick="openTrade('short')">SELL</button>
-<button class="close" onclick="closeTrade()">CLOSE</button>
+<div class="panel">
+<h3>Strategy Settings</h3>
+EMA Fast <input id="emaFast" type="number" value="25">
+EMA Slow <input id="emaSlow" type="number" value="50">
+EMA Trend <input id="emaTrend" type="number" value="100">
+Risk % (simulated) <input id="risk" type="number" value="1">
+RR Ratio <input id="rr" type="number" value="2">
+<button onclick="runBacktest()">Run Backtest</button>
+<button style="margin-top:8px;background:#ff4d88" onclick="resetData()">Reset</button>
 </div>
 
-<div class="stats" id="stats"></div>
+<div class="panel">
+<h3>Results</h3>
+<div id="stats"></div>
+<canvas id="equityChart" width="800" height="300"></canvas>
+</div>
 
 </div>
 
 <script>
 
-let trades = JSON.parse(localStorage.getItem("bt_trades")) || [];
-let currentTrade = null;
-let equity = 0;
-let currentPrice = 0;
-let currentChange = 0;
+let sampleData = generateSampleData(500);
+let equityCurve = [];
 
-/* ===== Fetch Live Gold ===== */
-function updatePrice(){
-    fetch('/api/gold')
-    .then(res=>res.json())
-    .then(d=>{
-        currentPrice = d.price || 0;
-        currentChange = d.ch || 0;
+function generateSampleData(n){
+    let data=[];
+    let price=1800;
+    for(let i=0;i<n;i++){
+        price+= (Math.random()-0.5)*10;
+        data.push(price);
+    }
+    return data;
+}
 
-        const priceEl = document.getElementById("price");
-        const changeEl = document.getElementById("change");
+function calculateEMA(data, period){
+    let ema=[];
+    let k = 2/(period+1);
+    ema[0]=data[0];
+    for(let i=1;i<data.length;i++){
+        ema[i]=data[i]*k + ema[i-1]*(1-k);
+    }
+    return ema;
+}
 
-        priceEl.textContent = "$" + currentPrice.toFixed(2);
-        changeEl.textContent =
-            (d.ch>=0?"+":"") + d.ch.toFixed(2) +
-            " (" + (d.ch>=0?"+":"") + d.chp.toFixed(2) + "%)";
+function runBacktest(){
+    const fast = parseInt(document.getElementById("emaFast").value);
+    const slow = parseInt(document.getElementById("emaSlow").value);
+    const trend = parseInt(document.getElementById("emaTrend").value);
+    const rr = parseFloat(document.getElementById("rr").value);
 
-        priceEl.classList.remove("up","down");
-        changeEl.classList.remove("up","down");
+    const emaFast = calculateEMA(sampleData,fast);
+    const emaSlow = calculateEMA(sampleData,slow);
+    const emaTrend = calculateEMA(sampleData,trend);
 
-        if(d.ch>=0){
-            priceEl.classList.add("up");
-            changeEl.classList.add("up");
+    let balance=1000;
+    let peak=balance;
+    let maxDD=0;
+    let wins=0;
+    let losses=0;
+    equityCurve=[];
+    let position=null;
+
+    for(let i=trend;i<sampleData.length;i++){
+
+        if(!position){
+            if(emaFast[i]>emaSlow[i] && sampleData[i]>emaTrend[i]){
+                position={type:"long",entry:sampleData[i]};
+            }
+            if(emaFast[i]<emaSlow[i] && sampleData[i]<emaTrend[i]){
+                position={type:"short",entry:sampleData[i]};
+            }
         }else{
-            priceEl.classList.add("down");
-            changeEl.classList.add("down");
+            let pnl=0;
+            if(position.type==="long"){
+                pnl = sampleData[i]-position.entry;
+            }else{
+                pnl = position.entry-sampleData[i];
+            }
+
+            if(Math.abs(pnl)>=rr*5){
+                balance+=pnl;
+                if(pnl>0) wins++; else losses++;
+                position=null;
+            }
         }
 
-        if(currentTrade){
-            updateFloatingPnL();
-        }
-    });
-}
-
-/* ===== Open Trade ===== */
-function openTrade(type){
-    if(currentTrade || !currentPrice) return;
-
-    currentTrade = {
-        type:type,
-        entry:currentPrice
-    };
-
-    document.getElementById("status").textContent =
-        type === "long"
-        ? "OPEN LONG @ " + currentPrice.toFixed(2)
-        : "OPEN SHORT @ " + currentPrice.toFixed(2);
-}
-
-/* ===== Floating PnL ===== */
-function updateFloatingPnL(){
-    let pnl = 0;
-
-    if(currentTrade.type === "long"){
-        pnl = currentPrice - currentTrade.entry;
-    }else{
-        pnl = currentTrade.entry - currentPrice;
+        equityCurve.push(balance);
+        if(balance>peak) peak=balance;
+        let dd=(peak-balance)/peak;
+        if(dd>maxDD) maxDD=dd;
     }
 
-    document.getElementById("status").textContent =
-        currentTrade.type.toUpperCase() +
-        " | Entry: " + currentTrade.entry.toFixed(2) +
-        " | Floating P/L: " + pnl.toFixed(2);
-}
+    let total=wins+losses;
+    let winrate= total? (wins/total*100).toFixed(1):0;
 
-/* ===== Close Trade ===== */
-function closeTrade(){
-    if(!currentTrade) return;
-
-    let pnl = 0;
-
-    if(currentTrade.type === "long"){
-        pnl = currentPrice - currentTrade.entry;
-    }else{
-        pnl = currentTrade.entry - currentPrice;
-    }
-
-    equity += pnl;
-
-    trades.push({
-        type:currentTrade.type,
-        entry:currentTrade.entry,
-        close:currentPrice,
-        pnl:pnl
-    });
-
-    localStorage.setItem("bt_trades", JSON.stringify(trades));
-
-    currentTrade = null;
-    document.getElementById("status").textContent = "No Position";
-
-    calculateStats();
-}
-
-/* ===== Stats ===== */
-function calculateStats(){
-    const total = trades.length;
-    const wins = trades.filter(t=>t.pnl>0);
-    const winrate = total ? (wins.length/total*100).toFixed(1) : 0;
-    const net = trades.reduce((a,b)=>a+b.pnl,0).toFixed(2);
-
-    document.getElementById("stats").innerHTML = `
-    Total Trades: ${total}<br>
+    document.getElementById("stats").innerHTML=`
+    Start Balance: 1000<br>
+    End Balance: ${balance.toFixed(2)}<br>
+    Net Profit: ${(balance-1000).toFixed(2)}<br>
     Winrate: ${winrate}%<br>
-    Net P/L: ${net}<br>
-    Equity: ${equity.toFixed(2)}
+    Max Drawdown: ${(maxDD*100).toFixed(2)}%<br>
+    Total Trades: ${total}
     `;
+
+    drawEquity();
 }
 
-updatePrice();
-calculateStats();
-setInterval(updatePrice,5000);
+function drawEquity(){
+    const canvas=document.getElementById("equityChart");
+    const ctx=canvas.getContext("2d");
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+
+    let max=Math.max(...equityCurve);
+    let min=Math.min(...equityCurve);
+
+    ctx.beginPath();
+    equityCurve.forEach((v,i)=>{
+        let x=i*(canvas.width/equityCurve.length);
+        let y=canvas.height-((v-min)/(max-min))*canvas.height;
+        if(i===0) ctx.moveTo(x,y);
+        else ctx.lineTo(x,y);
+    });
+    ctx.strokeStyle="#00ffcc";
+    ctx.stroke();
+}
+
+function resetData(){
+    equityCurve=[];
+    document.getElementById("stats").innerHTML="";
+    const ctx=document.getElementById("equityChart").getContext("2d");
+    ctx.clearRect(0,0,800,300);
+}
 
 </script>
-
 </body>
 </html>
