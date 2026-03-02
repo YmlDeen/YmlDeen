@@ -1,201 +1,164 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Strategy Research Engine</title>
+<title>H1 Replay Simulator</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
 body{
-    font-family:'Inter',sans-serif;
-    background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
-    color:white;
-    padding:30px;
-}
-.container{
-    max-width:900px;
-    margin:auto;
-}
-.title{
-    text-align:center;
-    font-size:26px;
-    font-weight:800;
-    margin-bottom:25px;
-}
-.panel{
-    background:rgba(255,255,255,0.08);
-    backdrop-filter:blur(25px);
-    padding:20px;
-    border-radius:20px;
-    margin-bottom:20px;
-}
-input{
-    width:100%;
-    padding:10px;
-    margin:6px 0;
-    border-radius:10px;
-    border:none;
-}
+font-family:'Inter',sans-serif;
+background:#0f2027;
+color:white;
+padding:20px}
+.top{
+display:flex;
+justify-content:space-between;
+margin-bottom:10px}
 button{
-    padding:12px;
-    width:100%;
-    border:none;
-    border-radius:12px;
-    font-weight:700;
-    cursor:pointer;
-    background:#00ffcc;
-}
-.stats{
-    margin-top:15px;
-    font-size:14px;
-}
-canvas{
-    background:#111;
-    border-radius:12px;
-    margin-top:15px;
-}
+padding:8px 12px;
+border:none;
+border-radius:6px;
+cursor:pointer;
+font-weight:600}
+.next{background:#00ffcc}
+.buy{background:#00cc88}
+.sell{background:#ff4d88}
+.close{background:#ffaa00}
+.home{background:#555}
+.panel{margin-top:10px}
 </style>
 </head>
 <body>
 
-<div class="container">
+<div class="top">
+<h2>H1 Replay Simulator</h2>
+<button class="home" onclick="goHome()">← Home</button>
+</div>
 
-<div class="title">EMA Strategy Research Tool</div>
+<canvas id="chart" height="120"></canvas>
 
 <div class="panel">
-<h3>Strategy Settings</h3>
-EMA Fast <input id="emaFast" type="number" value="25">
-EMA Slow <input id="emaSlow" type="number" value="50">
-EMA Trend <input id="emaTrend" type="number" value="100">
-Risk % (simulated) <input id="risk" type="number" value="1">
-RR Ratio <input id="rr" type="number" value="2">
-<button onclick="runBacktest()">Run Backtest</button>
-<button style="margin-top:8px;background:#ff4d88" onclick="resetData()">Reset</button>
+Risk % <input id="risk" value="1" style="width:60px">
+SL <input id="sl" style="width:80px">
+TP <input id="tp" style="width:80px">
+<button class="next" onclick="nextCandle()">Next</button>
+<button class="buy" onclick="openTrade('long')">Buy</button>
+<button class="sell" onclick="openTrade('short')">Sell</button>
+<button class="close" onclick="closeTrade()">Close</button>
 </div>
 
-<div class="panel">
-<h3>Results</h3>
-<div id="stats"></div>
-<canvas id="equityChart" width="800" height="300"></canvas>
-</div>
-
-</div>
+<div id="status"></div>
+<div id="equity"></div>
 
 <script>
 
-let sampleData = generateSampleData(500);
-let equityCurve = [];
+let data=[];
+let visibleData=[];
+let index=50;
+let chart;
+let balance=1000;
+let trade=null;
 
-function generateSampleData(n){
-    let data=[];
-    let price=1800;
-    for(let i=0;i<n;i++){
-        price+= (Math.random()-0.5)*10;
-        data.push(price);
-    }
-    return data;
+async function loadData(){
+try{
+let res=await fetch('/api/gold-history-h1');
+data=await res.json();
+}catch{
+let price=1800;
+for(let i=0;i<300;i++){
+let open=price;
+price+=(Math.random()-0.5)*10;
+let close=price;
+data.push({
+time:i,
+open:open,
+high:Math.max(open,close)+5,
+low:Math.min(open,close)-5,
+close:close
+});
+}
+}
+visibleData=data.slice(0,index);
+initChart();
 }
 
-function calculateEMA(data, period){
-    let ema=[];
-    let k = 2/(period+1);
-    ema[0]=data[0];
-    for(let i=1;i<data.length;i++){
-        ema[i]=data[i]*k + ema[i-1]*(1-k);
-    }
-    return ema;
+function initChart(){
+let ctx=document.getElementById('chart').getContext('2d');
+chart=new Chart(ctx,{
+type:'candlestick',
+data:{
+datasets:[{
+label:'H1',
+data:visibleData
+}]
+}
+});
 }
 
-function runBacktest(){
-    const fast = parseInt(document.getElementById("emaFast").value);
-    const slow = parseInt(document.getElementById("emaSlow").value);
-    const trend = parseInt(document.getElementById("emaTrend").value);
-    const rr = parseFloat(document.getElementById("rr").value);
-
-    const emaFast = calculateEMA(sampleData,fast);
-    const emaSlow = calculateEMA(sampleData,slow);
-    const emaTrend = calculateEMA(sampleData,trend);
-
-    let balance=1000;
-    let peak=balance;
-    let maxDD=0;
-    let wins=0;
-    let losses=0;
-    equityCurve=[];
-    let position=null;
-
-    for(let i=trend;i<sampleData.length;i++){
-
-        if(!position){
-            if(emaFast[i]>emaSlow[i] && sampleData[i]>emaTrend[i]){
-                position={type:"long",entry:sampleData[i]};
-            }
-            if(emaFast[i]<emaSlow[i] && sampleData[i]<emaTrend[i]){
-                position={type:"short",entry:sampleData[i]};
-            }
-        }else{
-            let pnl=0;
-            if(position.type==="long"){
-                pnl = sampleData[i]-position.entry;
-            }else{
-                pnl = position.entry-sampleData[i];
-            }
-
-            if(Math.abs(pnl)>=rr*5){
-                balance+=pnl;
-                if(pnl>0) wins++; else losses++;
-                position=null;
-            }
-        }
-
-        equityCurve.push(balance);
-        if(balance>peak) peak=balance;
-        let dd=(peak-balance)/peak;
-        if(dd>maxDD) maxDD=dd;
-    }
-
-    let total=wins+losses;
-    let winrate= total? (wins/total*100).toFixed(1):0;
-
-    document.getElementById("stats").innerHTML=`
-    Start Balance: 1000<br>
-    End Balance: ${balance.toFixed(2)}<br>
-    Net Profit: ${(balance-1000).toFixed(2)}<br>
-    Winrate: ${winrate}%<br>
-    Max Drawdown: ${(maxDD*100).toFixed(2)}%<br>
-    Total Trades: ${total}
-    `;
-
-    drawEquity();
+function nextCandle(){
+if(index>=data.length) return;
+visibleData.push(data[index]);
+index++;
+chart.update();
+checkSLTP();
 }
 
-function drawEquity(){
-    const canvas=document.getElementById("equityChart");
-    const ctx=canvas.getContext("2d");
-    ctx.clearRect(0,0,canvas.width,canvas.height);
+function openTrade(type){
+if(trade) return;
+let entry=visibleData[visibleData.length-1].close;
+let sl=parseFloat(document.getElementById("sl").value);
+let tp=parseFloat(document.getElementById("tp").value);
+let risk=parseFloat(document.getElementById("risk").value)/100;
 
-    let max=Math.max(...equityCurve);
-    let min=Math.min(...equityCurve);
-
-    ctx.beginPath();
-    equityCurve.forEach((v,i)=>{
-        let x=i*(canvas.width/equityCurve.length);
-        let y=canvas.height-((v-min)/(max-min))*canvas.height;
-        if(i===0) ctx.moveTo(x,y);
-        else ctx.lineTo(x,y);
-    });
-    ctx.strokeStyle="#00ffcc";
-    ctx.stroke();
+trade={type,entry,sl,tp,risk};
+updateStatus();
 }
 
-function resetData(){
-    equityCurve=[];
-    document.getElementById("stats").innerHTML="";
-    const ctx=document.getElementById("equityChart").getContext("2d");
-    ctx.clearRect(0,0,800,300);
+function checkSLTP(){
+if(!trade) return;
+let price=visibleData[visibleData.length-1].close;
+
+if(trade.type==="long"){
+if(price<=trade.sl || price>=trade.tp)
+closeTrade();
+}else{
+if(price>=trade.sl || price<=trade.tp)
+closeTrade();
 }
+updateStatus();
+}
+
+function closeTrade(){
+if(!trade) return;
+let price=visibleData[visibleData.length-1].close;
+let riskAmt=balance*trade.risk;
+let diff= trade.type==="long"
+? price-trade.entry
+: trade.entry-price;
+
+let pnl=(diff/(trade.entry-trade.sl))*riskAmt;
+balance+=pnl;
+trade=null;
+updateStatus();
+}
+
+function updateStatus(){
+document.getElementById("status").innerHTML=
+trade
+? `Open ${trade.type} | Entry: ${trade.entry}`
+: "No Position";
+
+document.getElementById("equity").innerHTML=
+`Balance: ${balance.toFixed(2)}`;
+}
+
+function goHome(){
+window.location.href="https://ymldeen.onrender.com/";
+}
+
+loadData();
 
 </script>
 </body>
