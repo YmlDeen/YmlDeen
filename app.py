@@ -2,74 +2,70 @@ from flask import Flask, jsonify
 import requests
 import time
 
-app = Flask(__name__)
-
-GOLD_API_KEY = "goldapi-1kvaizsmm14nx8l-io"
+app = Flask(name)
 
 CACHE = {"data": None, "time": 0}
 CACHE_TTL = 60
 
 def usdthb():
-    try:
-        r = requests.get("https://api.frankfurter.app/latest?from=USD&to=THB",timeout=8)
-        return r.json()["rates"]["THB"]
-    except:
-        r = requests.get("https://open.er-api.com/v6/latest/USD",timeout=8)
-        return r.json()["rates"]["THB"]
+try:
+r = requests.get("https://api.frankfurter.app/latest?from=USD&to=THB", timeout=8)
+return r.json()["rates"]["THB"]
+except:
+r = requests.get("https://open.er-api.com/v6/latest/USD", timeout=8)
+return r.json()["rates"]["THB"]
 
 def gold():
-    if CACHE["data"] and time.time()-CACHE["time"]<CACHE_TTL:
-        return CACHE["data"]
 
-    try:
-        r = requests.get(
-            "https://www.goldapi.io/api/XAU/USD",
-            headers={
-                "x-access-token": GOLD_API_KEY,
-                "Content-Type": "application/json"
-            },
-            timeout=8
-        )
+if CACHE["data"] and time.time() - CACHE["time"] < CACHE_TTL:
+    return CACHE["data"]
 
-        d = r.json()
+try:
 
-        price = d.get("price",0)
-        ch = d.get("ch",0)
-        chp = d.get("chp",0)
+    r = requests.get(
+        "https://api.metals.live/v1/spot/gold",
+        timeout=8
+    )
 
-        rate = usdthb()
+    data = r.json()
 
-        BAHT=15.244
-        PURE=0.965
-        TROY=31.1035
-        PREM=1.2
+    price = data[0]["price"]
 
-        thai=((price+PREM)*rate*BAHT*PURE)/TROY
+    ch = 0
+    chp = 0
 
-        data={
-            "price":price,
-            "usdthb":rate,
-            "thai":round(thai),
-            "ch":ch,
-            "chp":chp
-        }
+    rate = usdthb()
 
-        CACHE["data"]=data
-        CACHE["time"]=time.time()
+    BAHT = 15.244
+    PURE = 0.965
+    TROY = 31.1035
+    PREM = 1.2
 
-        return data
+    thai = ((price + PREM) * rate * BAHT * PURE) / TROY
 
-    except Exception as e:
-        return {"error":str(e)}
+    result = {
+        "price": price,
+        "usdthb": rate,
+        "thai": round(thai),
+        "ch": ch,
+        "chp": chp
+    }
+
+    CACHE["data"] = result
+    CACHE["time"] = time.time()
+
+    return result
+
+except Exception as e:
+    return {"error": str(e)}
 
 @app.route("/")
 def index():
-    return open("index.html",encoding="utf-8").read()
+return open("index.html", encoding="utf-8").read()
 
 @app.route("/api/gold")
 def api():
-    return jsonify(gold())
+return jsonify(gold())
 
-if __name__=="__main__":
-    app.run(debug=True)
-    
+if name == "main":
+app.run(debug=True)
